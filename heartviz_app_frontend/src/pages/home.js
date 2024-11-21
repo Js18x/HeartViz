@@ -1,0 +1,86 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./home.css"
+
+function HomePage() {
+    const navigate = useNavigate();
+    const [subspaces, setSubspaces] = useState([]);
+    const [showPopup, setShowPopup] = useState(false);
+    const [newSubspaceName, setNewSubspaceName] = useState("");
+
+    useEffect(() => {
+        const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
+        setSubspaces(savedSubspaces);
+    }, []);
+
+    const handleCreateSubspace = () => {
+        if (newSubspaceName.trim()) {
+            const newSubspace = {
+                id: Date.now(),
+                name: newSubspaceName,
+                attributes: [],
+            };
+            const updatedSubspaces = [...subspaces, newSubspace];
+            setSubspaces(updatedSubspaces);
+            localStorage.setItem("subspaces", JSON.stringify(updatedSubspaces));
+            setNewSubspaceName("");
+            setShowPopup(false);
+            navigate(`/add-subspace?id=${newSubspace.id}`);
+        } else {
+            alert("Please enter a valid subspace name");
+        }
+    };
+
+    const handleEditSubspace = (id) => {
+        navigate(`/add-subspace?id=${id}`);
+    };
+
+    const handleExploreSubspace = (id) => {
+        navigate(`/explore?id=${id}`);
+    };
+
+    const handleOpenPopup = () => setShowPopup(true);
+    const handleClosePopup = () => setShowPopup(false);
+
+    return (
+        <div className="home-page">
+            <h1>Welcome to HeartViz</h1>
+            <button onClick={handleOpenPopup} className="create-btn">Create New Subspace</button>
+            {subspaces.length > 0 ? (
+                <div className="subspaces-container">
+                    {subspaces.map((subspace) => (
+                        <div key={subspace.id} className="subspace-card">
+                            <div className="subspace-name">{subspace.name}</div>
+                            <div className="subspace-buttons">
+                                <button onClick={() => handleEditSubspace(subspace.id)} className="edit-btn">Edit</button>
+                                <button onClick={() => handleExploreSubspace(subspace.id)} className="explore-btn">Explore</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p>No subspaces available. Create a new one to get started.</p>
+            )}
+
+            {showPopup && (
+                <div className="popup-overlay">
+                    <div className="popup">
+                        <h2>Create New Subspace</h2>
+                        <input
+                            type="text"
+                            placeholder="Enter subspace name"
+                            value={newSubspaceName}
+                            onChange={(e) => setNewSubspaceName(e.target.value)}
+                        />
+                        <div className="popup-actions">
+                            <button onClick={handleCreateSubspace}>Create</button>
+                            <button onClick={handleClosePopup}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default HomePage;

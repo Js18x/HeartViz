@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request
-import pandas as pd
 
 # Import the DataLoader class
 from DataLoader import DataLoader
@@ -54,17 +53,45 @@ def create_subspace():
 def get_feature_ranges():
     """
     API endpoint to fetch feature ranges.
-
+    ---------------
     Query Parameters:
+    -------------
     - sub_ind (optional): Index of the subspace. If not provided, fetches for the full dataset.
 
     Response:
+    -------------
     - JSON object containing feature ranges.
     """
     sub_ind = request.args.get("sub_ind", type=int)
     try:
         feature_ranges = loader.get_feature_ranges(sub_ind)
         return jsonify({"feature_ranges": feature_ranges})
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route('/fetch_data_with_features', methods=['GET'])
+def fetch_data_with_features():
+    """
+    API endpoint to fetch data with features.
+
+    Query Parameters
+    -----------
+    - sub_ind (optional): Index of the subspace. If not provided, fetches for the full dataset.
+    - features (optional): List of feature names to filter on.
+
+    Response
+    -----------
+    :returns: JSON object containing the data with features and their corresponding ranges.
+    """
+    features_lst = request.args.get("features", type=str)
+    sub_ind = request.args.get("sub_ind", type=int)
+    if features_lst is not None:
+        features_lst = features_lst.split(",")
+
+    try:
+        fetched_data = loader.fetch_data_with_features(sub_ind, features_lst).to_dict(orient="list")
+        return jsonify({"data": fetched_data})
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 

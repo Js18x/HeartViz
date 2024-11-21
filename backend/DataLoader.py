@@ -1,5 +1,5 @@
-from ucimlrepo import fetch_ucirepo
 import pandas as pd
+from ucimlrepo import fetch_ucirepo
 
 
 class DataLoader:
@@ -79,6 +79,23 @@ class DataLoader:
             raise ValueError("Subspace index out of range")
 
         return {col: [int(df[col].min()), int(df[col].max())] for col in df.columns}
+
+    def fetch_data_with_features(self, sub_ind: int = None, features: list[str] = None):
+        if sub_ind is None:
+            df = self.dataset
+        elif 0 <= sub_ind < len(self.subspaces):
+            df = self.subspaces[sub_ind]
+        else:
+            raise ValueError("Subspace index out of range")
+
+        subspace_features = df.columns
+        if features is None:
+            features = df.columns
+        else:
+            diff_set = set(subspace_features) - set(features)
+            if len(diff_set) > 0:
+                raise ValueError(f"Contains features that do not match: {diff_set}")
+        return df[features]
 
 
 if __name__ == "__main__":

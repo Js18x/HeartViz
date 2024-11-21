@@ -1,0 +1,3 @@
+flask
+ucimlrepo
+pandas

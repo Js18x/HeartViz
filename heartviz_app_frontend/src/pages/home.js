@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./home.css"
+import "./home.css";
 
 function HomePage() {
     const navigate = useNavigate();
@@ -9,26 +9,21 @@ function HomePage() {
     const [newSubspaceName, setNewSubspaceName] = useState("");
 
     useEffect(() => {
+        // Load saved subspaces from local storage
         const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
         setSubspaces(savedSubspaces);
     }, []);
 
     const handleCreateSubspace = () => {
-        if (newSubspaceName.trim()) {
-            const newSubspace = {
-                id: Date.now(),
-                name: newSubspaceName,
-                attributes: [],
-            };
-            const updatedSubspaces = [...subspaces, newSubspace];
-            setSubspaces(updatedSubspaces);
-            localStorage.setItem("subspaces", JSON.stringify(updatedSubspaces));
-            setNewSubspaceName("");
-            setShowPopup(false);
-            navigate(`/add-subspace?id=${newSubspace.id}`);
-        } else {
-            alert("Please enter a valid subspace name");
+        if (!newSubspaceName.trim()) {
+            alert("Please enter a valid subspace name.");
+            return;
         }
+
+        // Navigate to the add-subspace page with the subspace name (no ID yet)
+        navigate(`/add-subspace?name=${encodeURIComponent(newSubspaceName.trim())}`);
+        setNewSubspaceName(""); // Clear the input field
+        setShowPopup(false); // Close the popup
     };
 
     const handleEditSubspace = (id) => {
@@ -42,15 +37,25 @@ function HomePage() {
     const handleOpenPopup = () => setShowPopup(true);
     const handleClosePopup = () => setShowPopup(false);
 
+    // Functionality to clear local storage
+    const handleClearLocalStorage = () => {
+        if (window.confirm("Are you sure you want to clear all subspaces? This action cannot be undone.")) {
+            localStorage.clear();
+            setSubspaces([]); // Clear the subspaces from state as well
+            alert("All subspaces have been cleared.");
+        }
+    };
+
     return (
         <div className="home-page">
             <h1>Welcome to HeartViz</h1>
             <button onClick={handleOpenPopup} className="create-btn">Create New Subspace</button>
+            <button onClick={handleClearLocalStorage} className="clear-btn">Clear All Subspaces</button>
             {subspaces.length > 0 ? (
                 <div className="subspaces-container">
                     {subspaces.map((subspace) => (
                         <div key={subspace.id} className="subspace-card">
-                            <div className="subspace-name">{subspace.name}</div>
+                            <div className="subspace-name">{subspace.name || "Unnamed Subspace"}</div>
                             <div className="subspace-buttons">
                                 <button onClick={() => handleEditSubspace(subspace.id)} className="edit-btn">Edit</button>
                                 <button onClick={() => handleExploreSubspace(subspace.id)} className="explore-btn">Explore</button>

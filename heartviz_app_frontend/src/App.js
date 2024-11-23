@@ -3,7 +3,7 @@ import "./App.css";
 import NavigationBar from "./components/navigationBar/navBar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/home";
-import AddSubspacePage from "./pages/subspaceCreator";
+import AddSubspacePage2 from "./pages/subspaceC";
 import Explore from './pages/explore';
 
 function App() {
@@ -13,7 +13,7 @@ function App() {
         <NavigationBar />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/add-subspace" element={<AddSubspacePage />} />
+          <Route path="/add-subspace" element={<AddSubspacePage2 />} />
           <Route path="/explore" element={<Explore />} />
         </Routes>
       </div>

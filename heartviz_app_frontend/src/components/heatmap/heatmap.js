@@ -27,12 +27,12 @@ const CorrelationMatrixHeatmap = () => {
         data={[
           {
             z: zValues,
-            x: features, // Columns
-            y: features, // Rows
+            x: features,
+            y: features,
             type: "heatmap",
-            colorscale: "Portland", // Red to blue scale
-            reversescale: true, // Reverse the scale to match your example
-            zmid: 0, // Center the scale around 0
+            colorscale: "Portland",
+            reversescale: true,
+            zmid: 0,
           },
         ]}
         layout={{

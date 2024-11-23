@@ -1,118 +1,200 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import mockData from "../mockData";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./subspaceCreator.css";
 
 function AddSubspacePage() {
-    const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
-    const subspaceId = searchParams.get("id");
-    const [subspace, setSubspace] = useState({ name: "", attributes: [] });
-    const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
-        const currentSubspace = savedSubspaces.find((s) => s.id === Number(subspaceId));
-        if (currentSubspace) {
-            setSubspace(currentSubspace);
+  const [subspace, setSubspace] = useState({
+    name: "",
+    selected: [], // Selected attributes with filters
+  });
+  const [attributes, setAttributes] = useState([]); // All available attributes
+  const [currentFilter, setCurrentFilter] = useState(null); // Attribute currently being filtered
+  const [searchTerm, setSearchTerm] = useState(""); // Search term for attributes
+  const [minValue, setMinValue] = useState(""); // Min filter value
+  const [maxValue, setMaxValue] = useState(""); // Max filter value
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch all attributes when the component loads
+  useEffect(() => {
+    const fetchAttributes = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch attribute ranges from the backend
+        const response = await axios.get("http://127.0.0.1:5000/feature_ranges");
+
+        if (response.data && response.data.feature_ranges) {
+          const fetchedAttributes = Object.entries(response.data.feature_ranges).map(
+            ([name, range]) => ({
+              id: name,
+              name,
+              range,
+            })
+          );
+          setAttributes(fetchedAttributes);
+        } else {
+          setError("Invalid response structure from backend.");
         }
-    }, [subspaceId]);
 
-    useEffect(() => {
-        const handleConfirm = () => navigate("/");
-
-        const handleDelete = () => {
-            const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
-            const updatedSubspaces = savedSubspaces.filter((s) => s.id !== Number(subspaceId));
-            localStorage.setItem("subspaces", JSON.stringify(updatedSubspaces));
-            navigate("/");
-        };
-
-        window.addEventListener("confirmSubspace", handleConfirm);
-        window.addEventListener("deleteSubspace", handleDelete);
-
-        return () => {
-            window.removeEventListener("confirmSubspace", handleConfirm);
-            window.removeEventListener("deleteSubspace", handleDelete);
-        };
-    }, [subspaceId, navigate]);
-
-    const handleNameChange = (e) => {
-        const updatedName = e.target.value;
-        setSubspace({ ...subspace, name: updatedName });
-        updateLocalStorage({ ...subspace, name: updatedName });
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to load attributes. Please try again.");
+        setLoading(false);
+      }
     };
 
-    const handleSelect = (attr) => {
-        if (!subspace.attributes.some((existingAttr) => existingAttr.id === attr.id)) {
-            const updatedAttributes = [...subspace.attributes, attr];
-            const updatedSubspace = { ...subspace, attributes: updatedAttributes };
-            setSubspace(updatedSubspace);
-            updateLocalStorage(updatedSubspace);
-        }
-    };
+    fetchAttributes();
+  }, []);
 
-    const handleDeselect = (attr) => {
-        const updatedAttributes = subspace.attributes.filter((a) => a.id !== attr.id);
-        const updatedSubspace = { ...subspace, attributes: updatedAttributes };
-        setSubspace(updatedSubspace);
-        updateLocalStorage(updatedSubspace);
-    };
+  // Handle attribute selection
+  const handleSelectAttribute = (attribute) => {
+    if (subspace.selected.some((attr) => attr.id === attribute.id)) {
+      alert("Attribute already selected!");
+      return;
+    }
 
-    const updateLocalStorage = (updatedSubspace) => {
-        const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
-        const updatedSubspaces = savedSubspaces.map((s) =>
-            s.id === updatedSubspace.id ? updatedSubspace : s
-        );
-        localStorage.setItem("subspaces", JSON.stringify(updatedSubspaces));
-    };
+    setSubspace({
+      ...subspace,
+      selected: [
+        ...subspace.selected,
+        { ...attribute, filter: { min: attribute.range[0], max: attribute.range[1] } }, // Initialize filter
+      ],
+    });
+  };
 
-    const filteredAttributes = mockData.filter((attr) =>
-        attr.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  // Handle setting a filter for the current attribute
+  const handleSetFilter = () => {
+    if (minValue === "" || maxValue === "") {
+      alert("Please provide both min and max values.");
+      return;
+    }
+    if (Number(minValue) >= Number(maxValue)) {
+      alert("Min value cannot be greater than or equal to max value.");
+      return;
+    }
 
-    return (
-        <div className="add-subspace-page">
-            <div className="left-column">
-                <div className="attributes-list">
-                    <h2>Available Attributes</h2>
-                    <input
-                        type="text"
-                        placeholder="Filter attributes..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <ul>
-                        {filteredAttributes.map((attr) => (
-                            <li key={attr.id} onClick={() => handleSelect(attr)}>
-                                {attr.name}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <div className="selected-attributes">
-                    <input
-                        type="text"
-                        value={subspace.name}
-                        onChange={handleNameChange}
-                        placeholder="Subspace Name"
-                        className="subspace-name-input"
-                    />
-                    <ul>
-                        {subspace.attributes.map((attr) => (
-                            <li key={attr.id} onClick={() => handleDeselect(attr)}>
-                                {attr.name}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-            <div className="filter-panel">
-                <h2>Filter Options</h2>
-                <p>Add your filter components and options here.</p>
-            </div>
+    setSubspace({
+      ...subspace,
+      selected: subspace.selected.map((attr) =>
+        attr.id === currentFilter.id
+          ? { ...attr, filter: { min: Number(minValue), max: Number(maxValue) } }
+          : attr
+      ),
+    });
+
+    setCurrentFilter(null); // Reset current filter
+    setMinValue("");
+    setMaxValue("");
+  };
+
+  // Handle saving the subspace
+  const handleSaveSubspace = () => {
+    if (!subspace.name) {
+      alert("Please provide a name for the subspace.");
+      return;
+    }
+
+    const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
+    const updatedSubspace = { ...subspace, id: Date.now() };
+
+    // Save the subspace to localStorage
+    savedSubspaces.push(updatedSubspace);
+    localStorage.setItem("subspaces", JSON.stringify(savedSubspaces));
+
+    alert("Subspace saved successfully!");
+    navigate("/"); // Redirect back to the home page
+  };
+
+  // Filter attributes based on the search term
+  const filteredAttributes = attributes.filter((attr) =>
+    attr.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) return <div>Loading attributes...</div>;
+  if (error) return <div>{error}</div>;
+
+  return (
+    <div className="add-subspace-page">
+      <div className="left-column">
+        <div className="attributes-list">
+          <h2>Available Attributes</h2>
+          <input
+            type="text"
+            placeholder="Filter attributes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <ul>
+            {filteredAttributes && filteredAttributes.length > 0 ? (
+              filteredAttributes.map((attr) => (
+                <li key={attr.id} onClick={() => handleSelectAttribute(attr)}>
+                  {attr.name}
+                </li>
+              ))
+            ) : (
+              <p>No attributes available.</p>
+            )}
+          </ul>
         </div>
-    );
+        <div className="selected-attributes">
+          <h2>Selected Attributes</h2>
+          <ul>
+            {subspace.selected.map((attr) => (
+              <li
+                key={attr.id}
+                onClick={() => {
+                  setCurrentFilter(attr); // Set current filter
+                  setMinValue(attr.filter.min); // Set default min value
+                  setMaxValue(attr.filter.max); // Set default max value
+                }}
+                style={{
+                  backgroundColor: currentFilter && currentFilter.id === attr.id ? "#e7ffe7" : "",
+                }}
+              >
+                {attr.name}: {attr.filter.min} - {attr.filter.max}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div className="filter-panel">
+        <h2>Filter Options</h2>
+        {currentFilter ? (
+          <div>
+            <h3>{currentFilter.name}</h3>
+            <div>
+              Min:{" "}
+              <input
+                type="number"
+                value={minValue}
+                onChange={(e) => setMinValue(e.target.value)}
+              />
+            </div>
+            <div>
+              Max:{" "}
+              <input
+                type="number"
+                value={maxValue}
+                onChange={(e) => setMaxValue(e.target.value)}
+              />
+            </div>
+            <button onClick={handleSetFilter} className="confirm-button">
+              Confirm Filter
+            </button>
+          </div>
+        ) : (
+          <p>Select an attribute to configure its filter.</p>
+        )}
+        <button onClick={handleSaveSubspace} className="save-button">
+          Save Subspace
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default AddSubspacePage;

@@ -61,17 +61,47 @@ Example: `http://127.0.0.1:5000/correlation_matrix?sub_ind=1`
 
 **Request Body Example:**
 
+In `features` field, pass a list of feature names chosen in this subspace
+
+In `range` field, pass a list of lists, each list represents the range of the quantitative attributes or the chosen val
+ues of categorical values. They are treated in different ways
+
+- categorical attributes: a list of chosen values
+- quantitative attributes: a list of 2 values, `[min, max]`
 ```json
 {
-    "features": ["age", "sex", "trestbps"],
-    "ranges": [[30, 50], [0, 1], [120, 140]]
+  "features": [
+    "age",
+    "sex",
+    "trestbps",
+    "cp"
+  ],
+  "ranges": [
+    [
+      30,
+      50
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      120,
+      140
+    ],
+    [
+      1,
+      3,
+      4
+    ]
+  ]
 }
 ```
 
 **Response:**
 
-• subspace_index: an integer, representing he index of the created subspace. You should save the value for further
-operations on it.
+• subspace_index: an integer, representing the index of the created subspace. **You should save the value for further
+operations on it.**
 
 **Example response:**
 
@@ -159,7 +189,7 @@ Example on the full dataset:
 }
 ```
 
-## Fetch data with ranges
+## Fetch data with features
 
 **Endpoint:** `GET /fetch_data_with_features`
 

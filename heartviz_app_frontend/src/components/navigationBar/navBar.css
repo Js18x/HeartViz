@@ -1,0 +1,50 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2B50AA;
+  color: white;
+  padding: 10px 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-left h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.confirm-button {
+  background-color: #5cb85c;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.confirm-button:hover {
+  background-color: #4cae4c;
+}
+
+.delete-button {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+  background-color: #c9302c;
+}

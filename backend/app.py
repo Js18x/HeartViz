@@ -31,11 +31,15 @@ def create_subspace():
     """
     API endpoint to create a subspace with filtered features.
 
-    Request Body (JSON):
+    Request Body (JSON)
+    ------------
     - features: List of feature names to filter on.
-    - ranges: List of [min, max] ranges corresponding to the features.
+    - ranges:
+        for quantitative attributes: List of [min, max] ranges corresponding to the features.
+        for categorical attributes: list of chosen values
 
-    Response:
+    Response
+    -------------
     - JSON object containing the index of the created subspace.
     """
     data = request.get_json()

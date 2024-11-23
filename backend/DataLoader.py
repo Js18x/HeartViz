@@ -1,3 +1,5 @@
+from typing import Union
+
 import pandas as pd
 from ucimlrepo import fetch_ucirepo
 
@@ -6,6 +8,10 @@ class DataLoader:
     """
     A class to load, preprocess, and manipulate the Heart Disease dataset from the UCI repository.
     """
+
+    # data type of attributes
+    datatype = {"age": 0, "sex": 1, "cp": 1, "trestbps": 0, "chol": 0, "fbs": 0, "restecg": 1,
+                "thalach": 0, "exang": 1, "oldpeak": 0, "slope": 1, "ca": 0, "thal": 1, "target": 1}
 
     def __init__(self):
         """
@@ -24,7 +30,6 @@ class DataLoader:
             "age", "sex", "cp", "trestbps", "chol", "fbs", "restecg",
             "thalach", "exang", "oldpeak", "slope", "ca", "thal", "target"
         ]
-
         # Initialize a list for subspaces
         self.subspaces: list[pd.DataFrame] = []
 
@@ -42,22 +47,33 @@ class DataLoader:
             return self.subspaces[sub_ind].corr()
         raise ValueError("Subspace index out of range")
 
-    def create_subspace(self, features: list[str], ranges: list[list[float]]):
+    def create_subspace(self, features: list[str], ranges: list[list[Union[float, int]]]):
         """
         Creates a filtered subspace based on specified features and ranges.
 
         :param features: list of str. The features to filter on.
-        :param ranges: list of list. Each list specifies [min, max] for the corresponding feature.
+        :param ranges: list of list. For quantitative features, each list specifies [min, max].
+                       For categorical features, each list contains allowed values.
         :return: int. The index of the created subspace.
         :raises ValueError: If the number of features and ranges do not match.
+                            If a feature is not found in the dataset.
+                            If the range of quantitative features is invalid.
         """
         if len(features) != len(ranges):
             raise ValueError("Features and ranges must have the same length!")
 
-        condition = pd.Series(True, index=self.dataset.index)
+        condition = pd.Series(True, index=self.dataset.index)  # Start with all True
         for feature, range_ in zip(features, ranges):
-            min_val, max_val = range_
-            condition &= (self.dataset[feature] >= min_val) & (self.dataset[feature] <= max_val)
+            if feature not in self.dataset.columns:
+                raise ValueError(f"Feature '{feature}' not found in the dataset.")
+
+            if DataLoader.datatype[feature] == 0:  # Quantitative feature
+                if len(range_) != 2:
+                    raise ValueError(f"Range '{range_}' must have two elements.")
+                min_val, max_val = range_
+                condition &= (self.dataset[feature] >= min_val) & (self.dataset[feature] <= max_val)
+            else:  # Categorical feature
+                condition &= self.dataset[feature].isin(range_)
 
         subdataset = self.dataset[condition]
         self.subspaces.append(subdataset)
@@ -81,6 +97,12 @@ class DataLoader:
         return {col: [int(df[col].min()), int(df[col].max())] for col in df.columns}
 
     def fetch_data_with_features(self, sub_ind: int = None, features: list[str] = None):
+        """
+        fetch data with specified features and subspace.
+        :param sub_ind: an int, specify index of the subspace. If None, uses the full dataset.
+        :param features: a list of str, specify the features to filter on
+        :return: a pd.Dataframe, filtered data
+        """
         if sub_ind is None:
             df = self.dataset
         elif 0 <= sub_ind < len(self.subspaces):

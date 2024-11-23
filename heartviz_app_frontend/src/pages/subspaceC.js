@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import navigate hook
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Filter from "../components/filters/filter1"; // Numerical filter
-import CategoryFilter from "../components/filters/catFilter"; // Categorical filter
+import Filter from "../components/filters/filter1";
+import CategoryFilter from "../components/filters/catFilter";
 import "./subspaceCreator.css";
 
 function AddSubspacePage2() {
@@ -12,9 +12,8 @@ function AddSubspacePage2() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const navigate = useNavigate(); // Hook for navigation
+    const navigate = useNavigate();
 
-    // Fetch attribute names and ranges from the backend
     useEffect(() => {
         const fetchAttributes = async () => {
             try {
@@ -41,13 +40,11 @@ function AddSubspacePage2() {
         fetchAttributes();
     }, []);
 
-    // Determine if an attribute is categorical
     const isCategorical = (name) => {
         const categoricalVariables = ["sex", "cp", "restecg", "exang", "slope", "thal", "target"];
         return categoricalVariables.includes(name);
     };
 
-    // Handle selecting an attribute
     const handleSelectAttribute = (attribute) => {
         if (selectedAttributes.some((attr) => attr.id === attribute.id)) {
             alert("Attribute already selected!");
@@ -66,7 +63,6 @@ function AddSubspacePage2() {
         });
     };
 
-    // Handle deselecting an attribute
     const handleDeselectAttribute = (attribute) => {
         setSelectedAttributes(selectedAttributes.filter((attr) => attr.id !== attribute.id));
         const updatedFilters = { ...filters };
@@ -74,24 +70,21 @@ function AddSubspacePage2() {
         setFilters(updatedFilters);
     };
 
-    // Handle filter value changes
     const handleFilterChange = (name, newFilterValues) => {
         setFilters({ ...filters, [name]: newFilterValues });
     };
 
-    // Filter available attributes based on the search term
     const filteredAttributes = attributes.filter((attr) =>
         attr.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Save the subspace to the backend and localStorage
     const handleSaveSubspace = async () => {
         try {
             const features = Object.keys(filters);
             const ranges = features.map((feature) =>
                 isCategorical(feature)
-                    ? filters[feature] // Selected categorical values
-                    : [filters[feature].min, filters[feature].max] // Quantitative range
+                    ? filters[feature]
+                    : [filters[feature].min, filters[feature].max]
             );
 
             const subspaceName =
@@ -110,7 +103,6 @@ function AddSubspacePage2() {
             if (response.data && response.data.subspace_index !== undefined) {
                 const subspaceID = response.data.subspace_index;
 
-                // Save subspace metadata locally
                 const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
                 savedSubspaces.push({
                     id: subspaceID,

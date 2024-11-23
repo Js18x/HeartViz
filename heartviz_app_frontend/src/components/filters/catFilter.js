@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import "./catFilter.css"; // Import the CSS file for the filter styles
+import "./catFilter.css";
 
 function CategoryFilter({ name, range, onFilterChange }) {
-  // Generate categories for the range
   const categories = Array.from(
     { length: range[1] - range[0] + 1 },
     (_, i) => range[0] + i

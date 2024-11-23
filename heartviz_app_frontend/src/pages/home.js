@@ -9,7 +9,6 @@ function HomePage() {
     const [newSubspaceName, setNewSubspaceName] = useState("");
 
     useEffect(() => {
-        // Load saved subspaces from local storage
         const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
         setSubspaces(savedSubspaces);
     }, []);
@@ -20,28 +19,28 @@ function HomePage() {
             return;
         }
 
-        // Navigate to the add-subspace page with the subspace name (no ID yet)
         navigate(`/add-subspace?name=${encodeURIComponent(newSubspaceName.trim())}`);
-        setNewSubspaceName(""); // Clear the input field
-        setShowPopup(false); // Close the popup
+        setNewSubspaceName("");
+        setShowPopup(false);
     };
 
     const handleEditSubspace = (id) => {
-        navigate(`/add-subspace?id=${id}`);
+        navigate(`/explore?id=${id}`); 
     };
 
     const handleExploreSubspace = (id) => {
+        //console.log("Navigating to FetchDataTestPage with ID:", id);
         navigate(`/explore?id=${id}`);
     };
 
     const handleOpenPopup = () => setShowPopup(true);
+
     const handleClosePopup = () => setShowPopup(false);
 
-    // Functionality to clear local storage
     const handleClearLocalStorage = () => {
         if (window.confirm("Are you sure you want to clear all subspaces? This action cannot be undone.")) {
             localStorage.clear();
-            setSubspaces([]); // Clear the subspaces from state as well
+            setSubspaces([]);
             alert("All subspaces have been cleared.");
         }
     };
@@ -51,14 +50,27 @@ function HomePage() {
             <h1>Welcome to HeartViz</h1>
             <button onClick={handleOpenPopup} className="create-btn">Create New Subspace</button>
             <button onClick={handleClearLocalStorage} className="clear-btn">Clear All Subspaces</button>
+
             {subspaces.length > 0 ? (
                 <div className="subspaces-container">
                     {subspaces.map((subspace) => (
                         <div key={subspace.id} className="subspace-card">
+                            {/* Display the subspace name; default to "Unnamed Subspace" if no name is available */}
                             <div className="subspace-name">{subspace.name || "Unnamed Subspace"}</div>
                             <div className="subspace-buttons">
-                                <button onClick={() => handleEditSubspace(subspace.id)} className="edit-btn">Edit</button>
-                                <button onClick={() => handleExploreSubspace(subspace.id)} className="explore-btn">Explore</button>
+                                {/* Pass the correct ID to the test page on Edit */}
+                                <button
+                                    onClick={() => handleEditSubspace(subspace.id)}
+                                    className="edit-btn"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => handleExploreSubspace(subspace.id)}
+                                    className="explore-btn"
+                                >
+                                    Explore
+                                </button>
                             </div>
                         </div>
                     ))}

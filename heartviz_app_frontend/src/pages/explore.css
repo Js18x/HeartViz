@@ -1,0 +1,15 @@
+.explore-page {
+  text-align: center;
+  margin: 50px auto;
+  font-family: Arial, sans-serif;
+}
+
+.explore-page h1 {
+  font-size: 28px;
+  color: #333;
+}
+
+.explore-page p {
+  font-size: 18px;
+  color: #666;
+}

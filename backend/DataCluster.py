@@ -60,9 +60,10 @@ class DataCluster:
         # Helper function to collect all leaf nodes under a given subtree
         def collect_leaf_nodes(node, _indices: list):
             if "children" not in node:  # If this is a leaf node
-                return node["index_df"]
+                _indices.append(node["index_df"])
+                return
             for child in node["children"]:
-                _indices.append(collect_leaf_nodes(child, _indices))
+                collect_leaf_nodes(child, _indices)
 
         # Step 1: Find the subtree root with the specified node_name
         subroot = find_node(self.tree, node_name)
@@ -71,11 +72,11 @@ class DataCluster:
 
         # Step 2: Collect all leaf node indices under this subtree
         indices = []
-        leaf_indices = collect_leaf_nodes(subroot, indices)
+        collect_leaf_nodes(subroot, indices)
 
         # Step 3: Extract the rows from the DataFrame corresponding to these indices
-        subspace_df = self.df.iloc[leaf_indices]
-
+        subspace_df = self.df.iloc[indices]
+        subspace_df.reset_index(drop=True, inplace=True)
         return subspace_df
 
 
@@ -83,4 +84,6 @@ if __name__ == '__main__':
     loader = DataLoader()
     df = loader.fetch_data_with_features()
     cluster = DataCluster(df)
-    print(cluster.build_iterative_tree())
+    cluster.build_iterative_tree()
+    d = cluster.get_data_from_node_name("Node_468")
+    print(d)

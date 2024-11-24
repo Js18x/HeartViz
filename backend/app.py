@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+from DataCluster import DataCluster
 # Import the DataLoader class
 from DataLoader import DataLoader
 
@@ -84,7 +85,7 @@ def fetch_data_with_features():
     Query Parameters
     -----------
     - sub_ind (optional): Index of the subspace. If not provided, fetches for the full dataset.
-    - features (optional): List of feature names to filter on.
+    - features (optional): List of feature names to filter on. If not provided, fetches for the full subspace/dataset
 
     Response
     -----------
@@ -98,6 +99,32 @@ def fetch_data_with_features():
     try:
         fetched_data = loader.fetch_data_with_features(sub_ind, features_lst).to_dict(orient="list")
         return jsonify({"data": fetched_data})
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route('/hierarchy_cluster', methods=['GET'])
+def hierarchy_cluster():
+    """
+    API endpoint to build hierarchy tree from selected subspace
+
+    Query Parameters:
+    ---------------
+    - sub_ind (optional): Index of the subspace. If not provided, cluster for the full dataset.
+
+    Response:
+    -----------
+    :returns: JSON object containing the hierarchy tree. Refer to the tree for more details
+    """
+
+    sub_ind = request.args.get("sub_ind", type=int)
+
+    try:
+
+        sub_ind_df = loader.fetch_data_with_features(sub_ind)
+        cluster = DataCluster(sub_ind_df)
+        cluster_tree = cluster.build_iterative_tree()
+        return jsonify(cluster_tree)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 

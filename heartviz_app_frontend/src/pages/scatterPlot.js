@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
+import Select from 'react-select';
 import axios from 'axios';
 
 const ScatterPlot = () => {
   const [data, setData] = useState([]);
   const [xFeature, setXFeature] = useState('');
-  const [yFeature, setYFeature] = useState('');
+  const [yFeatures, setYFeatures] = useState([]);
   const [features, setFeatures] = useState([]);
 
   useEffect(() => {
@@ -30,7 +31,7 @@ const ScatterPlot = () => {
         setFeatures(keys);
         if (keys.length > 1) {
           setXFeature(keys[0]);
-          setYFeature(keys[1]);
+          setYFeatures([keys[1]]);
         }
       })
       .catch(error => console.error('Error fetching data:', error));
@@ -40,53 +41,70 @@ const ScatterPlot = () => {
     setXFeature(event.target.value);
   };
 
-  const handleYFeatureChange = (event) => {
-    setYFeature(event.target.value);
+  const handleYFeaturesChange = (selectedOptions) => {
+    setYFeatures(selectedOptions.map(option => option.value));
   };
 
-  const filteredData = data.map(item => ({
-    x: item[xFeature],
-    y: item[yFeature]
-  }));
+  const normalize = (arr) => {
+    const max = Math.max(...arr);
+    const min = Math.min(...arr);
+    return arr.map(value => (value - min) / (max - min));
+  };
+
+  const plotData = yFeatures.map((yFeature, index) => {
+    const yValues = data.map(item => item[yFeature]);
+    const normalizedYValues = normalize(yValues);
+    return {
+      x: data.map(item => item[xFeature]),
+      y: normalizedYValues,
+      mode: 'markers',
+      type: 'scatter',
+      name: yFeature,
+      marker: { color: `hsl(${index * 360 / yFeatures.length}, 70%, 50%)` }
+    };
+  });
 
   return (
     <div>
       <Plot
-        data={[
-          {
-            x: filteredData.map(item => item.x),
-            y: filteredData.map(item => item.y),
-            mode: 'markers',
-            type: 'scatter',
-            marker: { color: 'red' }
-          }
-        ]}
+        data={plotData}
         layout={{
           width: 1000,
           height: 600,
           title: 'Scatter Plot',
           xaxis: { title: xFeature },
-          yaxis: { title: yFeature },
+          yaxis: { title: 'Normalized Values' },
         }}
       />
       <div style={{ marginTop: '20px' }}>
         <label>
-          X Axis:
+          X Axis 
           <select value={xFeature} onChange={handleXFeatureChange}>
             {features.map(feature => (
               <option key={feature} value={feature}>{feature}</option>
             ))}
           </select>
         </label>
+        
+      </div>
+
+      
+
+
+      <div style={{ marginTop: '20px' }}>   
+        
         <label>
-          Y Axis:
-          <select value={yFeature} onChange={handleYFeatureChange}>
-            {features.map(feature => (
-              <option key={feature} value={feature}>{feature}</option>
-            ))}
-          </select>
+          Y Axis 
+          <Select
+            isMulti
+            value={yFeatures.map(feature => ({ value: feature, label: feature }))}
+            options={features.map(feature => ({ value: feature, label: feature }))}
+            onChange={handleYFeaturesChange}
+          />
         </label>
       </div>
+
+
     </div>
   );
 };

@@ -124,7 +124,24 @@ def hierarchy_cluster():
         sub_ind_df = loader.fetch_data_with_features(sub_ind)
         cluster = DataCluster(sub_ind_df)
         cluster_tree = cluster.build_iterative_tree()
+        DataCluster.clusters.append(cluster)
+        cluster_tree["cluster_id"] = len(DataCluster.clusters) - 1
         return jsonify(cluster_tree)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route('/create_subspace_from_node_name', methods=['GET'])
+def create_subspace_from_node_name():
+    cluster_id = request.args.get("cluster_id", type=int)
+    node_name = request.args.get("node_name", type=str)
+    if cluster_id is None or node_name is None:
+        return jsonify({"error": f"Please provide cluster_id or node_name: ({cluster_id}, {node_name})"}), 400
+    try:
+        cluster: DataCluster = DataCluster.clusters[cluster_id]
+        df = cluster.get_data_from_node_name(node_name)
+        subspace_id = loader.push_subspace(df)
+        return jsonify({"subspace_index": subspace_id})
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 

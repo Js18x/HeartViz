@@ -120,6 +120,9 @@ class DataLoader:
                 raise ValueError(f"Contains features that do not match: {diff_set}")
         return df[features]
 
+    def push_subspace(self, df: pd.DataFrame):
+        self.subspaces.append(df)
+        return len(self.subspaces) - 1
 
 if __name__ == "__main__":
     loader = DataLoader()

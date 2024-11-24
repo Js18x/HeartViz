@@ -227,7 +227,7 @@ Response Example (part): 2 features are fetched from a subspace
 
 ```
 
-## Build Hierarchy Cluster Tree (beta)
+## Build Hierarchy Cluster Tree
 
 **ENDPOINT:** `GET /hierarchy_cluster`
 
@@ -243,31 +243,59 @@ Query Example: get hierarchy cluster tree for subspace 3
 
 Response Example
 
-Open the [exmaple json file](hierarchy_tree_example.json) to get the full example
+First, you should save `cluster_id` in the returned json for subspace creation with node name
 
 The tree structure in json file is represented as a tree structure.
 There are 2 kinds of nodes:
 
-- `Node`: the non-leaf node. It has 3 fields: `children`, `name`, `value`.
-  The format of `name` is just like `Node 123`. In the `value` field, the value is the distance.
-  In the `children` field, you can refer to its children nodes.
+- `Node`: the non-leaf node. It has 4 fields: `children`, `name`, `value`, `leaf_node_size`.
+  - The format of `name` is just like `Node_183`.
+  - In the `children` field, you can refer to its children nodes.
+  - In the `value` field, the value is the **accumulated degree of heart disease of all its leaf nodes**.
+  - In the `leaf_node_size` field, it is an integer representing the number of its leaf nodes
+  - So you can simply get the average degree of heart disease of this cluster by `value / leaf_node_size`
 
 ```json
 {
   "children": [{...}, {...}],
-  "name": "Node 183",
-  "value": 8.894984535429936
+  "name": "Node_183",
+  "value": 2.123,
+  "leaf_node_size": 4
 }
 ```
 
-- `Leaf`': the leaf node. It has 2 fields: `name`, `value`. The name is like `Leaf 132`, and the `value` is the **row
-  index** in
-  the sub-dataset of the subspace. So you should call `/fetch_data_with_features` to get the sub-dataset.
+- `Leaf`': the leaf node. It has 3 fields: `name`, `value`, `index_df`.
+  - The format of name is like `Leaf_132`
+  - The `index_df` is the **row
+    index** in the sub-dataset of the subspace.
+  - The `value` is the degree of heart disease
 
 ```json
 {
-  "name": "Leaf 72",
-  "type": "leaf",
-  "value": 72
+  "name": "Leaf_72",
+  "value": 2,
+  "index_df":72
+}
+```
+
+## Create Subspace from Node Name
+
+**ENDPOINT**: `GET /create_subspace_from_node_name`
+
+**Query Parameters**
+
+- `cluster_id`: the id of cluster. You should have saved it when calling the endpoint that builds hierarchy tree.
+- `node_name`: The node name you want to create subspace from. All leaf nodes of it will compose a new subspace
+
+**Query Example**: create a new subspace from cluster id 0 and its node `Node_132`
+
+`GET /create_subspace_from_node_name?cluster_id=0&node_name=Node_132`
+
+**Response**
+The index of subspace
+
+```json
+{
+  "subspace_index": 1
 }
 ```

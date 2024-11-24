@@ -55,10 +55,8 @@ function HomePage() {
                 <div className="subspaces-container">
                     {subspaces.map((subspace) => (
                         <div key={subspace.id} className="subspace-card">
-                            {/* Display the subspace name; default to "Unnamed Subspace" if no name is available */}
                             <div className="subspace-name">{subspace.name || "Unnamed Subspace"}</div>
                             <div className="subspace-buttons">
-                                {/* Pass the correct ID to the test page on Edit */}
                                 <button
                                     onClick={() => handleEditSubspace(subspace.id)}
                                     className="edit-btn"

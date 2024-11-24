@@ -106,7 +106,7 @@ ul li:hover {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 140px);
-  overflow-y: auto; /* Makes the panel scrollable */
+  overflow-y: auto;
 }
 
 .actions {

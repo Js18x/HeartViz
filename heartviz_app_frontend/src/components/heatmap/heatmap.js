@@ -78,15 +78,6 @@ const CorrelationMatrixHeatmap = () => {
           },
         ]}
         layout={{
-          title: "Correlation Matrix",
-          xaxis: {
-            title: "Features",
-            side: "bottom",
-          },
-          yaxis: {
-            title: "Features",
-            automargin: true,
-          },
           width: 700,
           height: 700,
         }}

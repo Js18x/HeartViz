@@ -1,15 +1,52 @@
-.explore-page {
-  text-align: center;
-  margin: 50px auto;
-  font-family: Arial, sans-serif;
+/* Tab navigation container */
+.tabs {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  padding: 0.5rem 0; /* Space above the title */
+  margin-bottom: 1rem; /* Space between tabs and title */
 }
 
-.explore-page h1 {
-  font-size: 28px;
-  color: #333;
+/* Individual tab buttons */
+.tab-button {
+  padding: 0.6rem 1.2rem; /* Reduced padding */
+  margin-right: 0.1rem;
+  border: 2px solid transparent; /* Default state */
+  background-color: #136F63; /* Default button background color */
+  color: white;
+  font-size: 1rem; /* Slightly smaller font size */
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
-.explore-page p {
-  font-size: 18px;
-  color: #666;
+.tab-button:hover {
+  background-color: #92AFA2; /* Slightly darker hover effect */
+}
+
+.tab-button.active {
+  background-color: white; /* Active state turns the inside white */
+  color: #136F63; /* Text color changes to match outline */
+  border: 2px solid #136F63; /* Outline matches the button color */
+}
+
+/* Tab content container */
+.tab-content {
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 0.25rem;
+}
+
+/* Adjust the title position */
+h1 {
+  margin-top: 0;
+  font-size: 1.7rem; /* Slightly smaller title font size */
+  font-weight: bold;
+}
+
+p {
+  font-size: 1rem; /* Slightly smaller paragraph font size */
+  margin-bottom: 1rem; /* Reduced spacing between paragraphs */
 }

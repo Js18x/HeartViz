@@ -20,18 +20,23 @@ function AddSubspacePage2() {
                 setLoading(true);
                 const response = await axios.get("http://127.0.0.1:5000/feature_ranges");
 
+                console.log("API Response:", response.data); // Debugging
+
                 if (response.data && response.data.feature_ranges) {
                     const fetchedAttributes = Object.entries(response.data.feature_ranges).map(([name, range]) => ({
                         id: name,
                         name,
-                        range,
+                        range: range.map(Number), // Ensure range values are numbers
                     }));
                     setAttributes(fetchedAttributes);
                 } else {
-                    setError("Failed to load attributes.");
+                    throw new Error("Invalid response format: 'feature_ranges' key missing");
                 }
             } catch (err) {
-                setError("Error fetching attributes. Please try again.");
+                console.error("Error fetching attributes:", err);
+
+                // Provide detailed error messages for better debugging
+                setError(err.response?.data?.error || "Error fetching attributes. Please try again.");
             } finally {
                 setLoading(false);
             }
@@ -137,13 +142,17 @@ function AddSubspacePage2() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <ul>
-                        {filteredAttributes.map((attr) => (
-                            <li key={attr.id} onClick={() => handleSelectAttribute(attr)}>
-                                {attr.name}
-                            </li>
-                        ))}
-                    </ul>
+                    {filteredAttributes.length > 0 ? (
+                        <ul>
+                            {filteredAttributes.map((attr) => (
+                                <li key={attr.id} onClick={() => handleSelectAttribute(attr)}>
+                                    {attr.name}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No attributes available.</p>
+                    )}
                 </div>
                 <div className="selected-attributes">
                     <h2>Selected Attributes</h2>

@@ -226,3 +226,48 @@ Response Example (part): 2 features are fetched from a subspace
 }
 
 ```
+
+## Build Hierarchy Cluster Tree (beta)
+
+**ENDPOINT:** `GET /hierarchy_cluster`
+
+**Query Parameters**
+
+- sub_ind (optional): Index of the subspace. If not provided, uses the full dataset.
+
+Query Example: get hierarchy cluster tree for subspace 3
+
+`GET /hierarchy_cluster?sub_ind=3`
+
+**Response**
+
+Response Example
+
+Open the [exmaple json file](hierarchy_tree_example.json) to get the full example
+
+The tree structure in json file is represented as a tree structure.
+There are 2 kinds of nodes:
+
+- `Node`: the non-leaf node. It has 3 fields: `children`, `name`, `value`.
+  The format of `name` is just like `Node 123`. In the `value` field, the value is the distance.
+  In the `children` field, you can refer to its children nodes.
+
+```json
+{
+  "children": [{...}, {...}],
+  "name": "Node 183",
+  "value": 8.894984535429936
+}
+```
+
+- `Leaf`': the leaf node. It has 2 fields: `name`, `value`. The name is like `Leaf 132`, and the `value` is the **row
+  index** in
+  the sub-dataset of the subspace. So you should call `/fetch_data_with_features` to get the sub-dataset.
+
+```json
+{
+  "name": "Leaf 72",
+  "type": "leaf",
+  "value": 72
+}
+```

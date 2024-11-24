@@ -76,6 +76,7 @@ class DataLoader:
                 condition &= self.dataset[feature].isin(range_)
 
         subdataset = self.dataset.loc[condition, features]
+        subdataset.reset_index(drop=True, inplace=True)
         self.subspaces.append(subdataset)
         return len(self.subspaces) - 1
 
@@ -100,7 +101,7 @@ class DataLoader:
         """
         fetch data with specified features and subspace.
         :param sub_ind: an int, specify index of the subspace. If None, uses the full dataset.
-        :param features: a list of str, specify the features to filter on
+        :param features : Optional, a list of str, specify the features to filter on. If not provided, return the full subspace
         :return: a pd.Dataframe, filtered data
         """
         if sub_ind is None:

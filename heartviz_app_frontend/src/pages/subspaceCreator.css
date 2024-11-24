@@ -37,12 +37,13 @@ h2 {
 }
 
 input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  font-size: 16px;
+  width: calc(100% - 20px);
+  padding: 8px;
+  margin: 0 auto 10px auto;
+  font-size: 14px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .subspace-name-input {
@@ -109,43 +110,31 @@ ul li:hover {
   overflow-y: auto;
 }
 
+.save-button {
+  width: 150px;
+  margin-top: 20px;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #5cb85c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  align-self: center;
+}
+
+.save-button:hover {
+  background-color: #4cae4c;
+}
+
+.save-button:active {
+  transform: scale(0.95);
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;
-}
-
-.confirm-button,
-.delete-button {
-  padding: 10px 15px;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.confirm-button {
-  background-color: #5cb85c;
-  color: white;
-}
-
-.confirm-button:hover {
-  background-color: #4cae4c;
-}
-
-.delete-button {
-  background-color: #d9534f;
-  color: white;
-}
-
-.delete-button:hover {
-  background-color: #c9302c;
-}
-
-.confirm-button:active,
-.delete-button:active {
-  transform: scale(0.95);
 }

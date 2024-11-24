@@ -1,46 +1,9 @@
-// import React, { useEffect, useState } from "react";
-// import { useSearchParams } from "react-router-dom";
-// import CorrelationMatrixHeatmap from "../components/heatmap/heatmap";
-
-// function Explore() {
-//   const [searchParams] = useSearchParams();
-//   const subspaceId = searchParams.get("id");
-//   const [subspace, setSubspace] = useState(null);
-
-//   useEffect(() => {
-//     const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
-//     const currentSubspace = savedSubspaces.find((s) => s.id === Number(subspaceId));
-//     setSubspace(currentSubspace);
-//   }, [subspaceId]);
-
-//   return (
-//     <div className="explore-page">
-//       {subspace ? (
-//         <>
-//           <h1>Explore Subspace: {subspace.name}</h1>
-//           <p>
-//             Attributes:{" "}
-//             {subspace.features && subspace.features.length > 0
-//               ? subspace.features.join(", ")
-//               : "None selected."}
-//           </p>
-//           {/* Pass the subspaceId to the heatmap */}
-//           <CorrelationMatrixHeatmap subspaceId={subspaceId} />
-//         </>
-//       ) : (
-//         <p>Subspace not found!</p>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default Explore;
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import CorrelationMatrixHeatmap from "../components/heatmap/heatmap";
 import ScatterplotComponent from "../components/scatterplot/scatterplot";
 import ParallelCoordinatesPlot from "../components/parallelPlot/parallelPlot";
+import ClusteringTreeComponent from "../components/clusteringTree/clusteringTree";
 import "./explore.css";
 
 function Explore() {
@@ -71,7 +34,6 @@ function Explore() {
 
   return (
     <div className="explore-page">
-      {/* Tabs Navigation */}
       <div className="tabs">
         <button
           className={`tab-button ${
@@ -97,6 +59,14 @@ function Explore() {
         >
           Scatterplot
         </button>
+        <button
+          className={`tab-button ${
+            activeTab === "clusteringTree" ? "active" : ""
+          }`}
+          onClick={() => handleTabChange("clusteringTree")}
+        >
+          Clustering Tree
+        </button>
       </div>
 
       <h1>Explore Subspace: {subspace.name}</h1>
@@ -116,6 +86,9 @@ function Explore() {
         )}
         {activeTab === "scatterplot" && (
           <ScatterplotComponent subspaceId={subspaceId} />
+        )}
+        {activeTab === "clusteringTree" && (
+          <ClusteringTreeComponent subspaceId={subspaceId} />
         )}
       </div>
     </div>

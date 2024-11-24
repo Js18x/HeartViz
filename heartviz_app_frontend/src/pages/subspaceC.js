@@ -20,13 +20,11 @@ function AddSubspacePage2() {
                 setLoading(true);
                 const response = await axios.get("http://127.0.0.1:5000/feature_ranges");
 
-                console.log("API Response:", response.data); // Debugging
-
                 if (response.data && response.data.feature_ranges) {
                     const fetchedAttributes = Object.entries(response.data.feature_ranges).map(([name, range]) => ({
                         id: name,
                         name,
-                        range: range.map(Number), // Ensure range values are numbers
+                        range: range.map(Number),
                     }));
                     setAttributes(fetchedAttributes);
                 } else {
@@ -34,8 +32,6 @@ function AddSubspacePage2() {
                 }
             } catch (err) {
                 console.error("Error fetching attributes:", err);
-
-                // Provide detailed error messages for better debugging
                 setError(err.response?.data?.error || "Error fetching attributes. Please try again.");
             } finally {
                 setLoading(false);
@@ -59,7 +55,7 @@ function AddSubspacePage2() {
         setSelectedAttributes([...selectedAttributes, attribute]);
 
         const defaultFilter = isCategorical(attribute.name)
-            ? Array.from({ length: attribute.range[1] - attribute.range[0] + 1 }, (_, i) => attribute.range[0] + i) // Generate categories
+            ? Array.from({ length: attribute.range[1] - attribute.range[0] + 1 }, (_, i) => attribute.range[0] + i)
             : { min: attribute.range[0], max: attribute.range[1] };
 
         setFilters({

@@ -6,7 +6,7 @@ from DataCluster import DataCluster
 from DataLoader import DataLoader
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 loader = DataLoader()
 
 

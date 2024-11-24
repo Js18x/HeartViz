@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import navigate hook
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Filter from "../components/filters/filter1"; // Numerical filter
-import CategoryFilter from "../components/filters/catFilter"; // Categorical filter
+import Filter from "../components/filters/filter1";
+import CategoryFilter from "../components/filters/catFilter";
 import "./subspaceCreator.css";
 
 function AddSubspacePage2() {
@@ -12,27 +12,31 @@ function AddSubspacePage2() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const navigate = useNavigate(); // Hook for navigation
+    const navigate = useNavigate();
 
-    // Fetch attribute names and ranges from the backend
     useEffect(() => {
         const fetchAttributes = async () => {
             try {
                 setLoading(true);
                 const response = await axios.get("http://127.0.0.1:5000/feature_ranges");
 
+                console.log("API Response:", response.data); // Debugging
+
                 if (response.data && response.data.feature_ranges) {
                     const fetchedAttributes = Object.entries(response.data.feature_ranges).map(([name, range]) => ({
                         id: name,
                         name,
-                        range,
+                        range: range.map(Number), // Ensure range values are numbers
                     }));
                     setAttributes(fetchedAttributes);
                 } else {
-                    setError("Failed to load attributes.");
+                    throw new Error("Invalid response format: 'feature_ranges' key missing");
                 }
             } catch (err) {
-                setError("Error fetching attributes. Please try again.");
+                console.error("Error fetching attributes:", err);
+
+                // Provide detailed error messages for better debugging
+                setError(err.response?.data?.error || "Error fetching attributes. Please try again.");
             } finally {
                 setLoading(false);
             }
@@ -41,13 +45,11 @@ function AddSubspacePage2() {
         fetchAttributes();
     }, []);
 
-    // Determine if an attribute is categorical
     const isCategorical = (name) => {
         const categoricalVariables = ["sex", "cp", "restecg", "exang", "slope", "thal", "target"];
         return categoricalVariables.includes(name);
     };
 
-    // Handle selecting an attribute
     const handleSelectAttribute = (attribute) => {
         if (selectedAttributes.some((attr) => attr.id === attribute.id)) {
             alert("Attribute already selected!");
@@ -66,7 +68,6 @@ function AddSubspacePage2() {
         });
     };
 
-    // Handle deselecting an attribute
     const handleDeselectAttribute = (attribute) => {
         setSelectedAttributes(selectedAttributes.filter((attr) => attr.id !== attribute.id));
         const updatedFilters = { ...filters };
@@ -74,24 +75,21 @@ function AddSubspacePage2() {
         setFilters(updatedFilters);
     };
 
-    // Handle filter value changes
     const handleFilterChange = (name, newFilterValues) => {
         setFilters({ ...filters, [name]: newFilterValues });
     };
 
-    // Filter available attributes based on the search term
     const filteredAttributes = attributes.filter((attr) =>
         attr.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Save the subspace to the backend and localStorage
     const handleSaveSubspace = async () => {
         try {
             const features = Object.keys(filters);
             const ranges = features.map((feature) =>
                 isCategorical(feature)
-                    ? filters[feature] // Selected categorical values
-                    : [filters[feature].min, filters[feature].max] // Quantitative range
+                    ? filters[feature]
+                    : [filters[feature].min, filters[feature].max]
             );
 
             const subspaceName =
@@ -110,7 +108,6 @@ function AddSubspacePage2() {
             if (response.data && response.data.subspace_index !== undefined) {
                 const subspaceID = response.data.subspace_index;
 
-                // Save subspace metadata locally
                 const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
                 savedSubspaces.push({
                     id: subspaceID,
@@ -145,13 +142,17 @@ function AddSubspacePage2() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <ul>
-                        {filteredAttributes.map((attr) => (
-                            <li key={attr.id} onClick={() => handleSelectAttribute(attr)}>
-                                {attr.name}
-                            </li>
-                        ))}
-                    </ul>
+                    {filteredAttributes.length > 0 ? (
+                        <ul>
+                            {filteredAttributes.map((attr) => (
+                                <li key={attr.id} onClick={() => handleSelectAttribute(attr)}>
+                                    {attr.name}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No attributes available.</p>
+                    )}
                 </div>
                 <div className="selected-attributes">
                     <h2>Selected Attributes</h2>

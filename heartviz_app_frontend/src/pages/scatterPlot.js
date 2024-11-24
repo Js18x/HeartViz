@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Plot from 'react-plotly.js';
 import axios from 'axios';
 
 const ScatterPlot = () => {
@@ -51,16 +51,24 @@ const ScatterPlot = () => {
 
   return (
     <div>
-      <ResponsiveContainer width="100%" height={400}>
-        <ScatterChart>
-          <CartesianGrid />
-          <XAxis dataKey="x" name={xFeature} />
-          <YAxis dataKey="y" name={yFeature} />
-          <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-          <Legend />
-          <Scatter name="Data" data={filteredData} fill="#8884d8" />
-        </ScatterChart>
-      </ResponsiveContainer>
+      <Plot
+        data={[
+          {
+            x: filteredData.map(item => item.x),
+            y: filteredData.map(item => item.y),
+            mode: 'markers',
+            type: 'scatter',
+            marker: { color: 'red' }
+          }
+        ]}
+        layout={{
+          width: 1000,
+          height: 600,
+          title: 'Scatter Plot',
+          xaxis: { title: xFeature },
+          yaxis: { title: yFeature },
+        }}
+      />
       <div style={{ marginTop: '20px' }}>
         <label>
           X Axis:

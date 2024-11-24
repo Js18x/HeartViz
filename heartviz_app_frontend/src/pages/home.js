@@ -29,10 +29,12 @@ function HomePage() {
     };
 
     const handleExploreSubspace = (id) => {
-        //console.log("Navigating to FetchDataTestPage with ID:", id);
         navigate(`/explore?id=${id}`);
     };
 
+    const handleExploreScatter = () => {
+        navigate(`/scatter`);
+    };
     const handleOpenPopup = () => setShowPopup(true);
 
     const handleClosePopup = () => setShowPopup(false);
@@ -50,7 +52,7 @@ function HomePage() {
             <h1>Welcome to HeartViz</h1>
             <button onClick={handleOpenPopup} className="create-btn">Create New Subspace</button>
             <button onClick={handleClearLocalStorage} className="clear-btn">Clear All Subspaces</button>
-
+            <button onClick={handleExploreScatter} className="scatter-btn">Scatter Plot Data</button>
             {subspaces.length > 0 ? (
                 <div className="subspaces-container">
                     {subspaces.map((subspace) => (

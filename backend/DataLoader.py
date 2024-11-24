@@ -24,6 +24,8 @@ class DataLoader:
         X = heart_disease.data.features
         y = heart_disease.data.targets
         self.dataset = pd.concat([X, y], axis=1)
+        self.dataset = self.dataset.fillna(self.dataset.mean())
+
 
         # Set column names
         self.dataset.columns = [

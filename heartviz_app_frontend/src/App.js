@@ -6,6 +6,7 @@ import HomePage from "./pages/home";
 import AddSubspacePage2 from "./pages/subspaceC";
 import Explore from "./pages/explore";
 import FetchDataTestPage from  "./pages/test";
+import ScatterPlot from  "./pages/scatterPlot";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/add-subspace" element={<AddSubspacePage2 />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/FetchDataTestPage" element={<FetchDataTestPage />} />
+          <Route path="/scatter" element={<ScatterPlot />} />
         </Routes>
       </div>
     </Router>

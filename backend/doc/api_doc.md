@@ -271,3 +271,151 @@ There are 2 kinds of nodes:
   "value": 72
 }
 ```
+
+## Distribution by Feature
+
+**Endpoint:** `GET /distribution_by_feature`
+
+**Query Parameters:**
+
+- feature (required): Name of the feature column for which the distribution is calculated.
+- sub_ind (optional): Index of the subspace. If not provided, the distribution is calculated on the full dataset.
+- by_label (optional): A boolean indicating if the distribution should be computed separately for each label in the
+  target column. By default, False.
+
+**Example Request:**
+
+`GET /distribution_by_feature?feature=age&sub_ind=1&by_label=true`
+
+**Response:**
+• Returns the count of the specified feature as a JSON object.
+• If by_label is true, the response contains distributions for each label value.
+
+**Response Example:**
+
+```json
+{
+  "0": {
+    "30": 11,
+    "40": 12,
+    "50": 13
+  },
+  "1": {
+    "30": 14,
+    "40": 15,
+    "50": 16
+  }
+}
+```
+
+**Error Responses:**
+
+• 400 Bad Request: If the feature is not found or the subspace index is invalid.
+
+`{
+"error": "Feature 'age' not found in the dataset."
+}`
+
+## Update Subspace
+
+**Endpoint:** `POST /update_subspace`
+
+**Request Body:**
+
+- sub_ind (required): Index of the subspace to be updated.
+- features (required): List of feature names included in the subspace.
+- ranges (required): List of ranges or values for the features in the subspace. Ranges for quantitative features are
+  provided as [min, max], and selected values for categorical features are provided as a list.
+
+**Example Request:**
+
+```json
+{
+  "sub_ind": 1,
+  "features": [
+    "age",
+    "sex",
+    "cp"
+  ],
+  "ranges": [
+    [
+      30,
+      50
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      2,
+      3
+    ]
+  ]
+}
+```
+
+**Response:**
+
+Returns a success message.
+
+**Response Example:**
+
+`{
+{'update_state': True}
+}`
+
+**Error Responses:**
+400 Bad Request: If the subspace index or input values are invalid.
+
+```json
+{
+  "error": "Subspace index out of range"
+}
+```
+
+## Dimension Reduction
+
+**Endpoint:** `GET /dimension_reduce`
+
+**Query Parameters:**
+
+- sub_ind (optional): Index of the subspace. If not provided, applies dimensionality reduction on the full dataset.
+- n_components (optional): Number of dimensions to reduce to. If not provided, 2 by default.
+
+Example Request:
+
+`GET /dimension_reduce?sub_ind=2&n_components=2`
+
+**Response:**
+
+Returns the reduced dataset as a JSON object, where each row has the reduced features and the label target.
+
+Response Example:
+
+```json
+{
+[
+  {
+    "compo_feature0": 1.23,
+    "compo_feature1": -0.67,
+    "target": 1
+  },
+  {
+    "compo_feature0": -0.45,
+    "compo_feature1": 0.89,
+    "target": 0
+  }
+]
+}
+```
+
+**Error Responses:**
+
+• 400 Bad Request: If the subspace index or number of components is invalid.
+
+```json
+{
+  "error": "Invalid number of components: must be between 1 and the number of features."
+}
+```

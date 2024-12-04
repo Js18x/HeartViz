@@ -1,6 +1,8 @@
 from typing import Union
 
 import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 from ucimlrepo import fetch_ucirepo
 
 
@@ -120,7 +122,90 @@ class DataLoader:
                 raise ValueError(f"Contains features that do not match: {diff_set}")
         return df[features]
 
+    def distribution_by_feature(self, feature: str, sub_ind: int, by_label):
+
+        if sub_ind is None:
+            df = self.dataset
+        elif 0 <= sub_ind < len(self.subspaces):
+            df = self.subspaces[sub_ind]
+        else:
+            raise ValueError("Subspace index out of range")
+
+        if feature is None:
+            raise ValueError("Feature cannot be None")
+        if feature not in df.columns:
+            raise ValueError(f"Feature '{feature}' not found in the dataset.")
+
+        by_label = True if by_label else False
+        # get distribution
+        if by_label and feature != "target":
+            distribution = {}
+            for i in range(0, 5):
+                distribution[i] = df[df['target'] == i][feature].value_counts().to_dict()
+        else:
+            df = df[feature]
+            distribution = df.value_counts().to_dict()
+        return distribution
+
+    def update_subspace(self, features: list[str], ranges: list[list[Union[float, int]]], sub_ind: int = None):
+        if len(features) != len(ranges):
+            raise ValueError("Features and ranges must have the same length!")
+
+        if sub_ind is None:
+            raise ValueError("Subspace index cannot be None")
+        elif not 0 <= sub_ind < len(self.subspaces):
+            raise ValueError("Subspace index out of range")
+
+        condition = pd.Series(True, index=self.dataset.index)  # Start with all True
+        for feature, range_ in zip(features, ranges):
+            if feature not in self.dataset.columns:
+                raise ValueError(f"Feature '{feature}' not found in the dataset.")
+
+            if DataLoader.datatype[feature] == 0:  # Quantitative feature
+                if len(range_) != 2:
+                    raise ValueError(f"Range '{range_}' must have two elements.")
+                min_val, max_val = range_
+                condition &= (self.dataset[feature] >= min_val) & (self.dataset[feature] <= max_val)
+            else:  # Categorical feature
+                condition &= self.dataset[feature].isin(range_)
+
+        subdataset = self.dataset.loc[condition, features]
+        subdataset.reset_index(drop=True, inplace=True)
+        self.subspaces[sub_ind] = subdataset
+        return {'update_state': True}
+
+    # Assume self.dataset is a pandas DataFrame
+    def dimension_reduce(self, sub_ind: int, n_components: int):
+        if sub_ind is None:
+            df = self.dataset
+        elif 0 <= sub_ind < len(self.subspaces):
+            df = self.subspaces[sub_ind]
+        else:
+            raise ValueError("Subspace index out of range")
+        n_components = 2 if n_components is None else n_components
+
+        # Separate features and target
+        features = df.drop(columns=["target"])
+        features = features.dropna()
+        target = self.dataset["target"]
+
+        # Standardize the feature data
+        scaler = StandardScaler()
+        scaled_features = scaler.fit_transform(features)
+
+        # Apply PCA to reduce dimensions to 2
+        pca = PCA(n_components=n_components)
+        reduced_features = pca.fit_transform(scaled_features)
+
+        # Create a new DataFrame with reduced features and target
+        reduced_df = pd.DataFrame(
+            reduced_features, columns=[f"compo_feature{i}" for i in range(n_components)]
+        )
+        reduced_df["target"] = target.reset_index(drop=True)
+
+        return reduced_df
+
 
 if __name__ == "__main__":
     loader = DataLoader()
-    print(loader.get_feature_ranges())
+    print(loader.dimension_reduce(None, n_components=2))

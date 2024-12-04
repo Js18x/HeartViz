@@ -129,5 +129,41 @@ def hierarchy_cluster():
         return jsonify({"error": str(e)}), 400
 
 
+@app.route('/distribution_by_feature', methods=['GET'])
+def distribution_by_feature():
+    sub_ind = request.args.get("sub_ind", type=int)
+    feature = request.args.get("feature", type=str)
+    by_label = request.args.get("by_label", type=bool)
+    try:
+        distribution = loader.distribution_by_feature(feature, sub_ind, by_label)
+        return jsonify(distribution)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route('/update_subspace', methods=['POST'])
+def update_subspace():
+    data = request.get_json()
+    sub_ind = data.get("sub_ind", type=int)
+    features = data.get("features")
+    ranges = data.get("ranges")
+
+    try:
+        res = loader.update_subspace(features, ranges, sub_ind)
+        return jsonify(res)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route('/dimension_reduce', methods=['GET'])
+def dimension_reduce():
+    sub_ind = request.args.get("sub_ind", type=int)
+    n_components = request.args.get("n_components", type=int)
+    try:
+        reduced_df = loader.dimension_reduce(sub_ind, n_components).to_dict(orient="list")
+        return jsonify(reduced_df)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
 if __name__ == "__main__":
     app.run(debug=True)

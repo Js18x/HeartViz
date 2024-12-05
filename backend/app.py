@@ -165,5 +165,15 @@ def dimension_reduce():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
+
+@app.route('/get_feature_metric', methods=['GET'])
+def get_feature_metric():
+    sub_ind = request.args.get("sub_ind", type=int)
+    feature = request.args.get("feature", '').split(',')
+    metric = request.args.get("metric", type=str)
+    result = loader.get_feature_metric(sub_ind, feature, metric)
+    return jsonify(result)
+
+
 if __name__ == "__main__":
     app.run(debug=True)

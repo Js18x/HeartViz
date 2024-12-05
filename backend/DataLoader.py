@@ -193,7 +193,7 @@ class DataLoader:
         scaler = StandardScaler()
         scaled_features = scaler.fit_transform(features)
 
-        # Apply PCA to reduce dimensions to 2
+        # Apply PCA to reduce dimensions to n_components
         pca = PCA(n_components=n_components)
         reduced_features = pca.fit_transform(scaled_features)
 
@@ -205,7 +205,24 @@ class DataLoader:
 
         return reduced_df
 
+    def get_feature_metric(self, sub_ind: int, features: [str], metric: str):
+        if sub_ind is None:
+            df = self.dataset
+        elif not 0 <= sub_ind < len(self.subspaces):
+            raise ValueError("Subspace index out of range")
+        else:
+            df = self.subspaces[sub_ind]
+
+        if not set(features).issubset(df.columns):
+            raise ValueError(f"Features '{features}' not found in the subspace {sub_ind}.")
+
+        if metric == 'max':
+            return df[features].max().to_dict()
+        if metric == 'avg':
+            return df[features].mean().to_dict()
+        raise ValueError(f"Metric '{metric}' not supported.")
+
 
 if __name__ == "__main__":
     loader = DataLoader()
-    print(loader.dimension_reduce(None, n_components=2))
+    print(loader.get_feature_metric(None, ["target", "cp"], metric="avg"))

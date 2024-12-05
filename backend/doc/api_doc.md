@@ -419,3 +419,49 @@ Response Example:
   "error": "Invalid number of components: must be between 1 and the number of features."
 }
 ```
+
+## Get Feature Metric
+
+**Endpoint:** `GET /get_feature_metric`
+
+**Description:**
+
+Retrieve a specific metric (maximum or average) for one or more features within a dataset or subspace.
+
+**Query Parameters:**
+
+- sub_ind (optional): Index of the subspace. If not provided, the metric is calculated on the full dataset.
+- feature (required): Comma-separated list of feature names for which the metric is calculated.
+- metric (required): The metric to calculate. Supported metrics:
+  - max: Maximum value of the feature(s).
+  - avg: Average (mean) value of the feature(s).
+
+**Example Request:**
+
+`GET /get_feature_metric?sub_ind=1&feature=age,chol&metric=max`
+
+**Response:**
+• A JSON object with the metric values for the specified features.
+
+**Response Example:**
+
+Request:
+
+`GET /get_feature_metric?sub_ind=1&feature=age,chol&metric=max`
+
+Response:
+
+```json
+{
+  "age": 77,
+  "chol": 564
+}
+```
+
+**Error Responses:**
+
+- 400 Bad Request: If the subspace index is out of range or features/metric are invalid.
+
+Notes:
+
+- Ensure that the metric parameter is one of the supported values (max or avg).

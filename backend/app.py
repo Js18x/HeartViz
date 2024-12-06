@@ -175,5 +175,12 @@ def get_feature_metric():
     return jsonify(result)
 
 
+@app.route('/get_subspace_filter', methods=['GET'])
+def get_subspace_filter():
+    sub_ind = request.args.get("sub_ind", type=int)
+    result = loader.get_subspace_filter(sub_ind)
+    return jsonify(result)
+
+
 if __name__ == "__main__":
     app.run(debug=True)

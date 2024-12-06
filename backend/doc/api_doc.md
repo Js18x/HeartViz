@@ -465,3 +465,15 @@ Response:
 Notes:
 
 - Ensure that the metric parameter is one of the supported values (max or avg).
+
+## Fetch subspace filter
+
+**Description**
+
+Return the original subspace filter when creating/updating subspace
+
+**Query Parameters**
+
+- sub_ind (required)
+  Example: `/get_subspace_filter?sub_ind=2`
+

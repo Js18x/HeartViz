@@ -144,7 +144,7 @@ def distribution_by_feature():
 @app.route('/update_subspace', methods=['POST'])
 def update_subspace():
     data = request.get_json()
-    sub_ind = data.get("sub_ind", type=int)
+    sub_ind = data.get("sub_ind")
     features = data.get("features")
     ranges = data.get("ranges")
 

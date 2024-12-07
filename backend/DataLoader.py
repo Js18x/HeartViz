@@ -66,7 +66,8 @@ class DataLoader:
             raise ValueError("Features and ranges must have the same length!")
 
         condition = pd.Series(True, index=self.dataset.index)  # Start with all True
-        filter = {"features": features, "ranges": ranges}
+
+        df_filter = {"features": features, "ranges": ranges}
 
         for feature, range_ in zip(features, ranges):
             if feature not in self.dataset.columns:
@@ -80,10 +81,10 @@ class DataLoader:
             else:  # Categorical feature
                 condition &= self.dataset[feature].isin(range_)
 
-        subdataset = self.dataset.loc[condition, features]
+        subdataset = self.dataset.loc[condition, features + ["target"] if 'target' not in features else features]
         subdataset.reset_index(drop=True, inplace=True)
         self.subspaces.append(subdataset)
-        self.subspace_filters.append(filter)
+        self.subspace_filters.append(df_filter)
         return len(self.subspaces) - 1
 
     def get_feature_ranges(self, sub_ind: int = None):
@@ -173,7 +174,8 @@ class DataLoader:
             raise ValueError("Subspace index out of range")
 
         condition = pd.Series(True, index=self.dataset.index)  # Start with all True
-        filter = {"features": features, "ranges": ranges}
+
+        df_filter = {"features": features, "ranges": ranges}
 
         for feature, range_ in zip(features, ranges):
             if feature not in self.dataset.columns:
@@ -187,10 +189,10 @@ class DataLoader:
             else:  # Categorical feature
                 condition &= self.dataset[feature].isin(range_)
 
-        subdataset = self.dataset.loc[condition, features]
+        subdataset = self.dataset.loc[condition, features + ["target"] if 'target' not in features else features]
         subdataset.reset_index(drop=True, inplace=True)
         self.subspaces[sub_ind] = subdataset
-        self.subspace_filters[sub_ind] = filter
+        self.subspace_filters[sub_ind] = df_filter
         return {'update_state': True}
 
     # Assume self.dataset is a pandas DataFrame

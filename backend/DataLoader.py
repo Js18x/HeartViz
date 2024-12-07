@@ -34,6 +34,7 @@ class DataLoader:
         ]
         # Initialize a list for subspaces
         self.subspaces: list[pd.DataFrame] = []
+        self.subspace_filters: [dict] = []
 
     def corr_matrix(self, sub_ind: int = None):
         """
@@ -65,6 +66,8 @@ class DataLoader:
             raise ValueError("Features and ranges must have the same length!")
 
         condition = pd.Series(True, index=self.dataset.index)  # Start with all True
+        filter = {"features": features, "ranges": ranges}
+
         for feature, range_ in zip(features, ranges):
             if feature not in self.dataset.columns:
                 raise ValueError(f"Feature '{feature}' not found in the dataset.")
@@ -80,6 +83,7 @@ class DataLoader:
         subdataset = self.dataset.loc[condition, features]
         subdataset.reset_index(drop=True, inplace=True)
         self.subspaces.append(subdataset)
+        self.subspace_filters.append(filter)
         return len(self.subspaces) - 1
 
     def get_feature_ranges(self, sub_ind: int = None):
@@ -98,6 +102,14 @@ class DataLoader:
             raise ValueError("Subspace index out of range")
 
         return {col: [int(df[col].min()), int(df[col].max())] for col in df.columns}
+
+    def get_subspace_filter(self, sub_ind: int = None):
+        if sub_ind is None:
+            raise ValueError("Cannot fetch filter on full dataset. Now passed sub_ind is None")
+        elif not 0 <= sub_ind < len(self.subspaces):
+            raise ValueError("Subspace index out of range")
+
+        return self.subspace_filters[sub_ind]
 
     def fetch_data_with_features(self, sub_ind: int = None, features: list[str] = None):
         """
@@ -157,6 +169,8 @@ class DataLoader:
             raise ValueError("Subspace index out of range")
 
         condition = pd.Series(True, index=self.dataset.index)  # Start with all True
+        filter = {"features": features, "ranges": ranges}
+
         for feature, range_ in zip(features, ranges):
             if feature not in self.dataset.columns:
                 raise ValueError(f"Feature '{feature}' not found in the dataset.")
@@ -172,6 +186,7 @@ class DataLoader:
         subdataset = self.dataset.loc[condition, features]
         subdataset.reset_index(drop=True, inplace=True)
         self.subspaces[sub_ind] = subdataset
+        self.subspace_filters[sub_ind] = filter
         return {'update_state': True}
 
     # Assume self.dataset is a pandas DataFrame
@@ -225,4 +240,4 @@ class DataLoader:
 
 if __name__ == "__main__":
     loader = DataLoader()
-    print(loader.get_feature_metric(None, ["target", "cp"], metric="avg"))
+    print(loader.get_subspace_filter(None))

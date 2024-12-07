@@ -1,27 +1,43 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import CorrelationMatrixHeatmap from "../components/heatmap/heatmap";
 import ScatterplotComponent from "../components/scatterplot/scatterplot";
 import ParallelCoordinatesPlot from "../components/parallelPlot/parallelPlot";
-import ClusteringTreeComponent from "../components/clusteringTree/clusteringTree";
+import DistributionPlotComponent from "../components/distribution/distributionComponent";
 import "./explore.css";
 
 function Explore() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const subspaceId = searchParams.get("id");
   const [subspace, setSubspace] = useState(null);
-  const [activeTab, setActiveTab] = useState("parallel");
+  const [allSubspaces, setAllSubspaces] = useState([]);
+
+  // State for scatterplot features
+  const [xFeature, setXFeature] = useState("");
+  const [yFeature, setYFeature] = useState("");
 
   useEffect(() => {
+    // Retrieve subspaces from local storage
     const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
+    setAllSubspaces(savedSubspaces);
+
+    // Find the current subspace
     const currentSubspace = savedSubspaces.find(
       (s) => s.id === Number(subspaceId)
     );
     setSubspace(currentSubspace);
   }, [subspaceId]);
 
-  const handleTabChange = (tabName) => {
-    setActiveTab(tabName);
+  const handleSubspaceChange = (event) => {
+    const selectedSubspaceId = event.target.value;
+    navigate(`/explore?id=${selectedSubspaceId}`);
+  };
+
+  // Handler to update scatterplot features from the correlation matrix
+  const handleMatrixClick = (x, y) => {
+    setXFeature(x);
+    setYFeature(y);
   };
 
   if (!subspaceId) {
@@ -34,65 +50,67 @@ function Explore() {
 
   return (
     <div className="explore-page">
-      <div className="tabs">
-        <button
-          className={`tab-button ${
-            activeTab === "parallel" ? "active" : ""
-          }`}
-          onClick={() => handleTabChange("parallel")}
+      <div className="header">
+        <h1 className="subspace-name">
+          Subspace: {subspace.name}
+          <div className="tooltip-container">
+            <button className="tooltip-button">?</button>
+            <div className="tooltip-content">
+              {subspace.attributes && subspace.attributes.length > 0 ? (
+                `Attributes: ${subspace.attributes.join(", ")}`
+              ) : (
+                "No attributes selected for this subspace."
+              )}
+            </div>
+          </div>
+        </h1>
+  
+        <select
+          className="subspace-dropdown"
+          value={subspaceId}
+          onChange={handleSubspaceChange}
         >
-          Parallel Coordinates Plot
-        </button>
-        <button
-          className={`tab-button ${
-            activeTab === "correlation" ? "active" : ""
-          }`}
-          onClick={() => handleTabChange("correlation")}
-        >
-          Correlation Matrix
-        </button>
-        <button
-          className={`tab-button ${
-            activeTab === "scatterplot" ? "active" : ""
-          }`}
-          onClick={() => handleTabChange("scatterplot")}
-        >
-          Scatterplot
-        </button>
-        <button
-          className={`tab-button ${
-            activeTab === "clusteringTree" ? "active" : ""
-          }`}
-          onClick={() => handleTabChange("clusteringTree")}
-        >
-          Clustering Tree
-        </button>
+          {allSubspaces.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
       </div>
-
-      <h1>Explore Subspace: {subspace.name}</h1>
-      <p>
-        Attributes:{" "}
-        {subspace.features && subspace.features.length > 0
-          ? subspace.features.join(", ")
-          : "No attributes selected for this subspace."}
-      </p>
-
-      <div className="tab-content">
-        {activeTab === "parallel" && (
+  
+      <div className="plots-container">
+        <div className="plot-section">
+          <h2>Parallel Coordinates Plot</h2>
           <ParallelCoordinatesPlot subspaceId={subspaceId} />
-        )}
-        {activeTab === "correlation" && (
-          <CorrelationMatrixHeatmap subspaceId={subspaceId} />
-        )}
-        {activeTab === "scatterplot" && (
-          <ScatterplotComponent subspaceId={subspaceId} />
-        )}
-        {activeTab === "clusteringTree" && (
-          <ClusteringTreeComponent subspaceId={subspaceId} />
-        )}
+        </div>
+  
+        <div className="plot-section">
+          <h2>Correlation Matrix</h2>
+          {/* Pass the handler for matrix cell clicks */}
+          <CorrelationMatrixHeatmap
+            subspaceId={subspaceId}
+            onMatrixClick={handleMatrixClick}
+          />
+        </div>
+  
+        <div className="plot-section">
+          <h2>Scatterplot</h2>
+          <ScatterplotComponent
+            subspaceId={subspaceId}
+            xFeature={xFeature}
+            yFeature={yFeature}
+            setXFeature={setXFeature}
+            setYFeature={setYFeature}
+          />
+        </div>
+  
+        <div className="plot-section">
+          <h2>Distribution Plot</h2>
+          <DistributionPlotComponent subspaceId={subspaceId} />
+        </div>
       </div>
     </div>
-  );
+  );  
 }
 
 export default Explore;

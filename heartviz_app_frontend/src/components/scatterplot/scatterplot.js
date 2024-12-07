@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
 
-const ScatterplotComponent = ({ subspaceId }) => {
+const ScatterplotComponent = ({ subspaceId, xFeature, yFeature, setXFeature, setYFeature }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [xFeature, setXFeature] = useState("");
-  const [yFeature, setYFeature] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,12 +38,6 @@ const ScatterplotComponent = ({ subspaceId }) => {
     fetchData();
   }, [subspaceId]);
 
-  const handlePlotClick = () => {
-    if (!xFeature || !yFeature) {
-      alert("Please select both X-axis and Y-axis features.");
-    }
-  };
-
   if (loading) {
     return <p>Loading data for scatterplot...</p>;
   }
@@ -62,7 +54,6 @@ const ScatterplotComponent = ({ subspaceId }) => {
 
   return (
     <div>
-      <h2>Scatterplot</h2>
       <div style={{ marginBottom: "20px" }}>
         <label style={{ marginRight: "10px" }}>
           X-Axis:
@@ -94,19 +85,6 @@ const ScatterplotComponent = ({ subspaceId }) => {
             ))}
           </select>
         </label>
-        <button
-          onClick={handlePlotClick}
-          style={{
-            marginLeft: "20px",
-            padding: "5px 10px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Plot
-        </button>
       </div>
       {xFeature && yFeature && (
         <Plot
@@ -120,7 +98,6 @@ const ScatterplotComponent = ({ subspaceId }) => {
             },
           ]}
           layout={{
-            title: "Scatterplot",
             xaxis: { title: xFeature },
             yaxis: { title: yFeature },
             width: 700,

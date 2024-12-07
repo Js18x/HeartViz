@@ -1,6 +1,8 @@
 from typing import Union
 
 import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 from ucimlrepo import fetch_ucirepo
 
 
@@ -32,6 +34,7 @@ class DataLoader:
         ]
         # Initialize a list for subspaces
         self.subspaces: list[pd.DataFrame] = []
+        self.subspace_filters: [dict] = []
 
     def corr_matrix(self, sub_ind: int = None):
         """
@@ -63,6 +66,8 @@ class DataLoader:
             raise ValueError("Features and ranges must have the same length!")
 
         condition = pd.Series(True, index=self.dataset.index)  # Start with all True
+        filter = {"features": features, "ranges": ranges}
+
         for feature, range_ in zip(features, ranges):
             if feature not in self.dataset.columns:
                 raise ValueError(f"Feature '{feature}' not found in the dataset.")
@@ -78,6 +83,7 @@ class DataLoader:
         subdataset = self.dataset.loc[condition, features]
         subdataset.reset_index(drop=True, inplace=True)
         self.subspaces.append(subdataset)
+        self.subspace_filters.append(filter)
         return len(self.subspaces) - 1
 
     def get_feature_ranges(self, sub_ind: int = None):
@@ -96,6 +102,14 @@ class DataLoader:
             raise ValueError("Subspace index out of range")
 
         return {col: [int(df[col].min()), int(df[col].max())] for col in df.columns}
+
+    def get_subspace_filter(self, sub_ind: int = None):
+        if sub_ind is None:
+            raise ValueError("Cannot fetch filter on full dataset. Now passed sub_ind is None")
+        elif not 0 <= sub_ind < len(self.subspaces):
+            raise ValueError("Subspace index out of range")
+
+        return self.subspace_filters[sub_ind]
 
     def fetch_data_with_features(self, sub_ind: int = None, features: list[str] = None):
         """
@@ -120,10 +134,116 @@ class DataLoader:
                 raise ValueError(f"Contains features that do not match: {diff_set}")
         return df[features]
 
+
+    def distribution_by_feature(self, feature: str, sub_ind: int, by_label):
+
+        if sub_ind is None:
+            df = self.dataset
+        elif 0 <= sub_ind < len(self.subspaces):
+            df = self.subspaces[sub_ind]
+        else:
+            raise ValueError("Subspace index out of range")
+
+        if feature is None:
+            raise ValueError("Feature cannot be None")
+        if feature not in df.columns:
+            raise ValueError(f"Feature '{feature}' not found in the dataset.")
+
+        by_label = True if by_label else False
+        # get distribution
+        if by_label and feature != "target":
+            distribution = {}
+            for i in range(0, 5):
+                distribution[i] = df[df['target'] == i][feature].value_counts().to_dict()
+        else:
+            df = df[feature]
+            distribution = df.value_counts().to_dict()
+        return distribution
+
+    def update_subspace(self, features: list[str], ranges: list[list[Union[float, int]]], sub_ind: int = None):
+        if len(features) != len(ranges):
+            raise ValueError("Features and ranges must have the same length!")
+
+        if sub_ind is None:
+            raise ValueError("Subspace index cannot be None")
+        elif not 0 <= sub_ind < len(self.subspaces):
+            raise ValueError("Subspace index out of range")
+
+        condition = pd.Series(True, index=self.dataset.index)  # Start with all True
+        filter = {"features": features, "ranges": ranges}
+
+        for feature, range_ in zip(features, ranges):
+            if feature not in self.dataset.columns:
+                raise ValueError(f"Feature '{feature}' not found in the dataset.")
+
+            if DataLoader.datatype[feature] == 0:  # Quantitative feature
+                if len(range_) != 2:
+                    raise ValueError(f"Range '{range_}' must have two elements.")
+                min_val, max_val = range_
+                condition &= (self.dataset[feature] >= min_val) & (self.dataset[feature] <= max_val)
+            else:  # Categorical feature
+                condition &= self.dataset[feature].isin(range_)
+
+        subdataset = self.dataset.loc[condition, features]
+        subdataset.reset_index(drop=True, inplace=True)
+        self.subspaces[sub_ind] = subdataset
+        self.subspace_filters[sub_ind] = filter
+        return {'update_state': True}
+
+    # Assume self.dataset is a pandas DataFrame
+    def dimension_reduce(self, sub_ind: int, n_components: int):
+        if sub_ind is None:
+            df = self.dataset
+        elif 0 <= sub_ind < len(self.subspaces):
+            df = self.subspaces[sub_ind]
+        else:
+            raise ValueError("Subspace index out of range")
+        n_components = 2 if n_components is None else n_components
+
+        # Separate features and target
+        features = df.drop(columns=["target"])
+        features = features.dropna()
+        target = self.dataset["target"]
+
+        # Standardize the feature data
+        scaler = StandardScaler()
+        scaled_features = scaler.fit_transform(features)
+
+        # Apply PCA to reduce dimensions to n_components
+        pca = PCA(n_components=n_components)
+        reduced_features = pca.fit_transform(scaled_features)
+
+        # Create a new DataFrame with reduced features and target
+        reduced_df = pd.DataFrame(
+            reduced_features, columns=[f"compo_feature{i}" for i in range(n_components)]
+        )
+        reduced_df["target"] = target.reset_index(drop=True)
+
+        return reduced_df
+
+    def get_feature_metric(self, sub_ind: int, features: [str], metric: str):
+        if sub_ind is None:
+            df = self.dataset
+        elif not 0 <= sub_ind < len(self.subspaces):
+            raise ValueError("Subspace index out of range")
+        else:
+            df = self.subspaces[sub_ind]
+
+        if not set(features).issubset(df.columns):
+            raise ValueError(f"Features '{features}' not found in the subspace {sub_ind}.")
+
+        if metric == 'max':
+            return df[features].max().to_dict()
+        if metric == 'avg':
+            return df[features].mean().to_dict()
+        raise ValueError(f"Metric '{metric}' not supported.")
+
+
     def push_subspace(self, df: pd.DataFrame):
         self.subspaces.append(df)
         return len(self.subspaces) - 1
 
+
 if __name__ == "__main__":
     loader = DataLoader()
-    print(loader.get_feature_ranges())
+    print(loader.get_subspace_filter(None))

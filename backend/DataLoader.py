@@ -134,6 +134,7 @@ class DataLoader:
                 raise ValueError(f"Contains features that do not match: {diff_set}")
         return df[features]
 
+
     def distribution_by_feature(self, feature: str, sub_ind: int, by_label):
 
         if sub_ind is None:
@@ -236,6 +237,11 @@ class DataLoader:
         if metric == 'avg':
             return df[features].mean().to_dict()
         raise ValueError(f"Metric '{metric}' not supported.")
+
+
+    def push_subspace(self, df: pd.DataFrame):
+        self.subspaces.append(df)
+        return len(self.subspaces) - 1
 
 
 if __name__ == "__main__":

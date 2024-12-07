@@ -135,22 +135,26 @@ class DataLoader:
         return df[features]
 
     def distribution_by_feature(self, feature: str, sub_ind: int, by_label):
-
         if sub_ind is None:
             df = self.dataset
         elif 0 <= sub_ind < len(self.subspaces):
             df = self.subspaces[sub_ind]
         else:
             raise ValueError("Subspace index out of range")
-
         if feature is None:
             raise ValueError("Feature cannot be None")
         if feature not in df.columns:
             raise ValueError(f"Feature '{feature}' not found in the dataset.")
 
         by_label = True if by_label else False
+
+        if feature == 'target' and by_label:
+            raise ValueError("cannot use 'target' feature with 'by_label' feature set to True")
+
+        if by_label and 'target' not in df.columns:
+            raise ValueError("target feature not found in the subspace so you can't set by_label to true.")
         # get distribution
-        if by_label and feature != "target":
+        if by_label:
             distribution = {}
             for i in range(0, 5):
                 distribution[i] = df[df['target'] == i][feature].value_counts().to_dict()

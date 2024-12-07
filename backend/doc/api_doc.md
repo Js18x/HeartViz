@@ -472,24 +472,13 @@ Notes:
 
 - Ensure that the metric parameter is one of the supported values (max or avg).
 
-## Create Subspace from Node Name
+## Fetch subspace filter
 
-**ENDPOINT**: `GET /create_subspace_from_node_name`
+**Description**
+
+Return the original subspace filter when creating/updating subspace
 
 **Query Parameters**
 
-- `cluster_id`: the id of cluster. You should have saved it when calling the endpoint that builds hierarchy tree.
-- `node_name`: The node name you want to create subspace from. All leaf nodes of it will compose a new subspace
-
-**Query Example**: create a new subspace from cluster id 0 and its node `Node_132`
-
-`GET /create_subspace_from_node_name?cluster_id=0&node_name=Node_132`
-
-**Response**
-The index of subspace
-
-```json
-{
-  "subspace_index": 1
-}
-```
+- sub_ind (required)
+  Example: `/get_subspace_filter?sub_ind=2`

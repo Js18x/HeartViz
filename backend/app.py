@@ -135,7 +135,8 @@ def hierarchy_cluster():
 def distribution_by_feature():
     sub_ind = request.args.get("sub_ind", type=int)
     feature = request.args.get("feature", type=str)
-    by_label = request.args.get("by_label", type=bool)
+    by_label = request.args.get("by_label", type=str).lower() in {"true", "yes", "1"}
+
     try:
         distribution = loader.distribution_by_feature(feature, sub_ind, by_label)
         return jsonify(distribution)
@@ -144,7 +145,7 @@ def distribution_by_feature():
 @app.route('/update_subspace', methods=['POST'])
 def update_subspace():
     data = request.get_json()
-    sub_ind = data.get("sub_ind", type=int)
+    sub_ind = data.get("sub_ind")
     features = data.get("features")
     ranges = data.get("ranges")
 

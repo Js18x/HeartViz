@@ -66,7 +66,8 @@ class DataLoader:
             raise ValueError("Features and ranges must have the same length!")
 
         condition = pd.Series(True, index=self.dataset.index)  # Start with all True
-        filter = {"features": features, "ranges": ranges}
+
+        df_filter = {"features": features, "ranges": ranges}
 
         for feature, range_ in zip(features, ranges):
             if feature not in self.dataset.columns:
@@ -80,10 +81,10 @@ class DataLoader:
             else:  # Categorical feature
                 condition &= self.dataset[feature].isin(range_)
 
-        subdataset = self.dataset.loc[condition, features]
+        subdataset = self.dataset.loc[condition, features + ["target"] if 'target' not in features else features]
         subdataset.reset_index(drop=True, inplace=True)
         self.subspaces.append(subdataset)
-        self.subspace_filters.append(filter)
+        self.subspace_filters.append(df_filter)
         return len(self.subspaces) - 1
 
     def get_feature_ranges(self, sub_ind: int = None):
@@ -136,22 +137,26 @@ class DataLoader:
 
 
     def distribution_by_feature(self, feature: str, sub_ind: int, by_label):
-
         if sub_ind is None:
             df = self.dataset
         elif 0 <= sub_ind < len(self.subspaces):
             df = self.subspaces[sub_ind]
         else:
             raise ValueError("Subspace index out of range")
-
         if feature is None:
             raise ValueError("Feature cannot be None")
         if feature not in df.columns:
             raise ValueError(f"Feature '{feature}' not found in the dataset.")
 
         by_label = True if by_label else False
+
+        if feature == 'target' and by_label:
+            raise ValueError("cannot use 'target' feature with 'by_label' feature set to True")
+
+        if by_label and 'target' not in df.columns:
+            raise ValueError("target feature not found in the subspace so you can't set by_label to true.")
         # get distribution
-        if by_label and feature != "target":
+        if by_label:
             distribution = {}
             for i in range(0, 5):
                 distribution[i] = df[df['target'] == i][feature].value_counts().to_dict()
@@ -170,7 +175,8 @@ class DataLoader:
             raise ValueError("Subspace index out of range")
 
         condition = pd.Series(True, index=self.dataset.index)  # Start with all True
-        filter = {"features": features, "ranges": ranges}
+
+        df_filter = {"features": features, "ranges": ranges}
 
         for feature, range_ in zip(features, ranges):
             if feature not in self.dataset.columns:
@@ -184,10 +190,10 @@ class DataLoader:
             else:  # Categorical feature
                 condition &= self.dataset[feature].isin(range_)
 
-        subdataset = self.dataset.loc[condition, features]
+        subdataset = self.dataset.loc[condition, features + ["target"] if 'target' not in features else features]
         subdataset.reset_index(drop=True, inplace=True)
         self.subspaces[sub_ind] = subdataset
-        self.subspace_filters[sub_ind] = filter
+        self.subspace_filters[sub_ind] = df_filter
         return {'update_state': True}
 
     # Assume self.dataset is a pandas DataFrame

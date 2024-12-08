@@ -1,9 +1,11 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS
-
 from DataCluster import DataCluster
+
 # Import the DataLoader class
 from DataLoader import DataLoader
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from llm.groq_llm import GroqClient
+from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
@@ -139,7 +141,8 @@ def distribution_by_feature():
     try:
         distribution = loader.distribution_by_feature(feature, sub_ind, by_label)
         return jsonify(distribution)
-
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
 
 @app.route('/update_subspace', methods=['POST'])
 def update_subspace():
@@ -180,6 +183,39 @@ def get_subspace_filter():
     sub_ind = request.args.get("sub_ind", type=int)
     result = loader.get_subspace_filter(sub_ind)
     return jsonify(result)
+    
+@app.route('/get_llm_response', methods=['GET'])
+def get_llm_response():
+    # Validate and get query parameters
+    try:
+        feature1 = request.args.get("feature1", type=str)
+        feature2 = request.args.get("feature2", type=str)
+        word_limit = request.args.get("word_limit", type=int)
+
+        # Check if the necessary parameters are present
+        if not feature1 or not feature2:
+            raise BadRequest("Missing required parameters: feature1 and feature2 are required.")
+        
+        # You can also validate the word_limit if needed
+        if word_limit is not None and word_limit <= 0:
+            raise BadRequest("word_limit should be a positive integer.")
+
+        FILE_PATH = 'llm/prompts/groq_api.json'
+
+        # Initialize the client and generate the answer
+        client = GroqClient()
+        result = client.generate_answer(feature1, feature2, FILE_PATH, word_limit)
+        return jsonify(result)
+
+    except BadRequest as e:
+        # Return a 400 response with a message if the parameters are invalid
+        return jsonify({"error": str(e)}), 400
+
+    except Exception as e:
+        # Catch other unexpected errors and return a 500 internal server error
+        return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

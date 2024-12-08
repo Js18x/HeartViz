@@ -6,8 +6,8 @@ import "./multispace.css";
 
 function MultiSpaceExplore() {
   const [allSubspaces, setAllSubspaces] = useState([]);
-  const [selectedSubspace1, setSelectedSubspace1] = useState("");
-  const [selectedSubspace2, setSelectedSubspace2] = useState("");
+  const [selectedSubspace1, setSelectedSubspace1] = useState(null);
+  const [selectedSubspace2, setSelectedSubspace2] = useState(null);
 
   useEffect(() => {
     const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
@@ -35,10 +35,16 @@ function MultiSpaceExplore() {
   };
 
   const renderTooltip = (subspaceId) => {
+    if (subspaceId === null || subspaceId === undefined) {
+      return null;
+    }
+
     const subspace = allSubspaces.find(
       (s) => s.id === parseInt(subspaceId, 10)
     );
-    if (!subspace) return null;
+    if (!subspace) {
+      return null;
+    }
 
     return (
       <div className="tooltip-content">
@@ -51,17 +57,15 @@ function MultiSpaceExplore() {
 
   return (
     <div className="explore-page">
-
       <div className="header">
         <h1>Multi-Subspace Exploration</h1>
         <div className="subspace-selection">
-
           <div className="subspace-dropdown-container">
             <label className="dropdown-label">Subspace 1:</label>
             <div className="dropdown-box">
               <select
                 className="subspace-dropdown"
-                value={selectedSubspace1}
+                value={selectedSubspace1 || ""}
                 onChange={(e) => handleSubspaceChange(e.target.value, 1)}
               >
                 {allSubspaces.map((subspace) => (
@@ -72,7 +76,7 @@ function MultiSpaceExplore() {
               </select>
               <div className="tooltip-container">
                 <button className="tooltip-button">?</button>
-                {selectedSubspace1 && renderTooltip(selectedSubspace1)}
+                {renderTooltip(selectedSubspace1)}
               </div>
             </div>
           </div>
@@ -82,7 +86,7 @@ function MultiSpaceExplore() {
             <div className="dropdown-box">
               <select
                 className="subspace-dropdown"
-                value={selectedSubspace2}
+                value={selectedSubspace2 || ""}
                 onChange={(e) => handleSubspaceChange(e.target.value, 2)}
               >
                 {allSubspaces.map((subspace) => (
@@ -93,7 +97,7 @@ function MultiSpaceExplore() {
               </select>
               <div className="tooltip-container">
                 <button className="tooltip-button">?</button>
-                {selectedSubspace2 && renderTooltip(selectedSubspace2)}
+                {renderTooltip(selectedSubspace2)}
               </div>
             </div>
           </div>
@@ -101,16 +105,27 @@ function MultiSpaceExplore() {
       </div>
 
       <div className="plots-container">
-        {selectedSubspace1 !== "" && selectedSubspace2 !== "" && (
+        {selectedSubspace1 !== null && selectedSubspace2 !== null && (
           <>
             <div className="plot-section">
               <h2>
-                Subspace {selectedSubspace1} vs Subspace {selectedSubspace2} (AVG)
+                Subspace {selectedSubspace1} vs Subspace {selectedSubspace2}{" "}
+                (AVG)
               </h2>
               <RadarComparisonChart
                 subInd1={selectedSubspace1}
                 subInd2={selectedSubspace2}
                 metric="avg"
+                subspace1Name={
+                  allSubspaces.find(
+                    (subspace) => subspace.id === selectedSubspace1
+                  )?.name || `Subspace ${selectedSubspace1}`
+                }
+                subspace2Name={
+                  allSubspaces.find(
+                    (subspace) => subspace.id === selectedSubspace2
+                  )?.name || `Subspace ${selectedSubspace2}`
+                }
               />
             </div>
 

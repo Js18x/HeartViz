@@ -59,20 +59,19 @@ const DimensionalityReductionPlot = ({ subspaceId }) => {
         size: 10,
         line: { width: 1, color: "black" },
       },
-      name: `Class ${cls}`,
+      name: `Severity level diagnosed:${cls}`,
     }));
   };
 
   return (
     <div>
-      <h2>Dimensionality Reduction Plot</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       {reducedData.length > 0 ? (
         <Plot
           data={getPlotData()}
           layout={{
-            height: 600,
-            width: 800,
+            height: 700,
+            width: 900,
           }}
         />
       ) : (

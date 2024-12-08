@@ -4,20 +4,22 @@ import axios from "axios";
 
 const DistributionPlot = ({ subspaceId }) => {
   const [attribute, setAttribute] = useState("");
-  const [label, setLabel] = useState("global");
+  const [label, setLabel] = useState("0");
   const [attributes, setAttributes] = useState([]);
-  const [binSize, setBinSize] = useState(10);
-  const [tempBinSize, setTempBinSize] = useState("10");
-  const [globalDistribution, setGlobalDistribution] = useState(null);
+  const [binSize, setBinSize] = useState(1);
+  const [tempBinSize, setTempBinSize] = useState("1");
   const [labelWiseDistribution, setLabelWiseDistribution] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchAttributes = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:5000/feature_ranges", {
-          params: { sub_ind: subspaceId },
-        });
+        const response = await axios.get(
+          "http://127.0.0.1:5000/feature_ranges",
+          {
+            params: { sub_ind: subspaceId },
+          }
+        );
         const attributes = Object.keys(response.data.feature_ranges);
         setAttributes(attributes);
         setAttribute(attributes[0]);
@@ -31,29 +33,24 @@ const DistributionPlot = ({ subspaceId }) => {
 
   useEffect(() => {
     if (attribute) {
-      const fetchGlobalDistribution = async () => {
-        try {
-          const response = await axios.get("http://127.0.0.1:5000/distribution_by_feature", {
-            params: { sub_ind: subspaceId, feature: attribute, by_label: false },
-          });
-          setGlobalDistribution(response.data);
-        } catch (err) {
-          setError("Failed to fetch global distribution.");
-        }
-      };
-
       const fetchLabelWiseDistribution = async () => {
         try {
-          const response = await axios.get("http://127.0.0.1:5000/distribution_by_feature", {
-            params: { sub_ind: subspaceId, feature: attribute, by_label: true },
-          });
+          const response = await axios.get(
+            "http://127.0.0.1:5000/distribution_by_feature",
+            {
+              params: {
+                sub_ind: subspaceId,
+                feature: attribute,
+                by_label: true,
+              },
+            }
+          );
           setLabelWiseDistribution(response.data);
         } catch (err) {
           setError("Failed to fetch label-wise distribution.");
         }
       };
 
-      fetchGlobalDistribution();
       fetchLabelWiseDistribution();
     }
   }, [attribute, subspaceId]);
@@ -76,10 +73,7 @@ const DistributionPlot = ({ subspaceId }) => {
   const plotData = () => {
     if (!attribute) return [];
 
-    let data = globalDistribution;
-    if (label !== "global" && labelWiseDistribution[label]) {
-      data = labelWiseDistribution[label];
-    }
+    let data = labelWiseDistribution[label];
 
     if (!data) return [];
 
@@ -88,7 +82,10 @@ const DistributionPlot = ({ subspaceId }) => {
     const max = Math.max(...keys);
     const bins = Math.ceil((max - min) / binSize);
 
-    const binEdges = Array.from({ length: bins + 1 }, (_, i) => min + i * binSize);
+    const binEdges = Array.from(
+      { length: bins + 1 },
+      (_, i) => min + i * binSize
+    );
     const binCounts = Array(bins).fill(0);
 
     keys.forEach((key) => {
@@ -98,7 +95,11 @@ const DistributionPlot = ({ subspaceId }) => {
 
     return [
       {
-        x: binEdges.slice(0, -1).map((edge, i) => `${edge.toFixed(2)} - ${(edge + binSize).toFixed(2)}`),
+        x: binEdges
+          .slice(0, -1)
+          .map(
+            (edge, i) => `${edge.toFixed(2)} - ${(edge + binSize).toFixed(2)}`
+          ),
         y: binCounts,
         type: "bar",
         marker: { color: "green" },
@@ -110,23 +111,29 @@ const DistributionPlot = ({ subspaceId }) => {
     <div style={{ textAlign: "center", padding: "20px" }}>
       <div style={{ marginBottom: "20px" }}>
         <label style={{ marginRight: "10px" }}>Attribute:</label>
-        <select value={attribute} onChange={(e) => setAttribute(e.target.value)}>
+        <select
+          value={attribute}
+          onChange={(e) => setAttribute(e.target.value)}
+        >
           {attributes.map((attr) => (
             <option key={attr} value={attr}>
               {attr}
             </option>
           ))}
         </select>
-        <label style={{ marginLeft: "20px", marginRight: "10px" }}>Label:</label>
+        <label style={{ marginLeft: "20px", marginRight: "10px" }}>
+          Severity diagnosed:
+        </label>
         <select value={label} onChange={(e) => setLabel(e.target.value)}>
-          <option value="global">Global</option>
           {Object.keys(labelWiseDistribution).map((lbl) => (
             <option key={lbl} value={lbl}>
-              Label {lbl}
+              {lbl}
             </option>
           ))}
         </select>
-        <label style={{ marginLeft: "20px", marginRight: "10px" }}>Bin Size:</label>
+        <label style={{ marginLeft: "20px", marginRight: "10px" }}>
+          Bin Size:
+        </label>
         <input
           type="number"
           value={tempBinSize}
@@ -140,7 +147,7 @@ const DistributionPlot = ({ subspaceId }) => {
         <Plot
           data={plotData()}
           layout={{
-            title: `Distribution of ${attribute} in relation to ${label === "global" ? "Global" : `severity rate ${label}`}`,
+            title: `Distribution of ${attribute} for diagnosed severity level ${label}`,
             xaxis: {
               title: { text: attribute, standoff: 40 },
               tickangle: 45,

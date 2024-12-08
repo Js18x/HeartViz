@@ -1,9 +1,9 @@
-from DataCluster import DataCluster
-
-# Import the DataLoader class
-from DataLoader import DataLoader
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+
+from DataCluster import DataCluster
+# Import the DataLoader class
+from DataLoader import DataLoader
 from llm.groq_llm import GroqClient
 from werkzeug.exceptions import BadRequest
 
@@ -150,6 +150,7 @@ def distribution_by_feature():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
+
 @app.route('/update_subspace', methods=['POST'])
 def update_subspace():
     data = request.get_json()
@@ -180,11 +181,17 @@ def get_feature_metric():
     sub_ind = request.args.get("sub_ind", type=int)
     metric = request.args.get("metric", type=str)
 
+    app.logger.info(f"Received request for feature metric: sub_ind={sub_ind}, metric={metric}")
+
     try:
         result = loader.get_feature_metric(sub_ind, metric)
         return jsonify(result)
     except ValueError as e:
+        app.logger.error(f"ValueError: {e}")
         return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500
 
 
 @app.route('/get_subspace_filter', methods=['GET'])
@@ -192,7 +199,8 @@ def get_subspace_filter():
     sub_ind = request.args.get("sub_ind", type=int)
     result = loader.get_subspace_filter(sub_ind)
     return jsonify(result)
-    
+
+
 @app.route('/get_llm_response', methods=['GET'])
 def get_llm_response():
     # Validate and get query parameters
@@ -223,8 +231,6 @@ def get_llm_response():
     except Exception as e:
         # Catch other unexpected errors and return a 500 internal server error
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)

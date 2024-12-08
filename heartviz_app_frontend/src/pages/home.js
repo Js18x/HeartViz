@@ -31,7 +31,9 @@ function HomePage() {
       return;
     }
 
-    navigate(`/add-subspace?name=${encodeURIComponent(newSubspaceName.trim())}`);
+    navigate(
+      `/add-subspace?name=${encodeURIComponent(newSubspaceName.trim())}`
+    );
     setNewSubspaceName("");
     setShowPopup(false);
   };
@@ -69,13 +71,18 @@ function HomePage() {
             payload
           );
 
-          if (createResponse.data && createResponse.data.subspace_index !== undefined) {
+          if (
+            createResponse.data &&
+            createResponse.data.subspace_index !== undefined
+          ) {
             break;
           }
         } catch (err) {
           retryCount++;
           if (retryCount === maxRetries) {
-            throw new Error("Failed to create Full Dataset subspace after retries.");
+            throw new Error(
+              "Failed to create Full Dataset subspace after retries."
+            );
           }
         }
       }
@@ -116,7 +123,9 @@ function HomePage() {
       setSelectedSubspace(null);
     }
 
-    if (subspaces.find((subspace) => subspace.id === id)?.name === "Full Dataset") {
+    if (
+      subspaces.find((subspace) => subspace.id === id)?.name === "Full Dataset"
+    ) {
       setIsFullDatasetCreated(false);
     }
   };
@@ -185,7 +194,7 @@ function HomePage() {
                   {subspace.name || "Unnamed Subspace"}
                 </div>
                 <div className="subspace-buttons">
-                  <button
+                  {/* <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEditSubspace(subspace.id);
@@ -193,8 +202,8 @@ function HomePage() {
                     className="edit-btn"
                   >
                     Edit
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteSubspace(subspace.id);
@@ -202,7 +211,7 @@ function HomePage() {
                     className="delete-btn"
                   >
                     Delete
-                  </button>
+                  </button> */}
                 </div>
               </div>
             ))}
@@ -211,30 +220,32 @@ function HomePage() {
           <p>No subspaces available. Create a new one to get started.</p>
         )}
         <div className="action-buttons">
-          <button onClick={handleOpenPopup} className="create-btn">
+          <button onClick={handleOpenPopup} className="button green-button">
             Create New Subspace
           </button>
           <button
             onClick={() => handleExploreSubspace(selectedSubspace?.id)}
-            className="explore-btn"
+            className="button green-button"
             disabled={!selectedSubspace}
           >
             Explore
           </button>
           <button
             onClick={handleExploreAllDataset}
-            className="explore-all-btn"
+            className="button blue-button"
             disabled={isFullDatasetCreated}
           >
             Explore Full Dataset
           </button>
-          <button onClick={handleClearLocalStorage} className="clear-btn">
+          <button
+            onClick={handleClearLocalStorage}
+            className="button red-button"
+          >
             Clear All Subspaces
           </button>
           <button
             onClick={handleOpenComparePopup}
-            className="create-btn"
-            style={{ backgroundColor: "blue" }}
+            className="button blue-button"
           >
             Compare Subspaces
           </button>

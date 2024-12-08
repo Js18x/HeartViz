@@ -4,10 +4,10 @@ import axios from "axios";
 
 const DualSubspaceDistributionPlot = ({ subspace1Id, subspace2Id }) => {
   const [attribute, setAttribute] = useState("");
-  const [label, setLabel] = useState("global");
+  const [label, setLabel] = useState("0");
   const [attributes, setAttributes] = useState([]);
-  const [binSize, setBinSize] = useState(10);
-  const [tempBinSize, setTempBinSize] = useState("10");
+  const [binSize, setBinSize] = useState(1);
+  const [tempBinSize, setTempBinSize] = useState("1");
   const [subspace1Distribution, setSubspace1Distribution] = useState(null);
   const [subspace2Distribution, setSubspace2Distribution] = useState(null);
   const [error, setError] = useState(null);
@@ -83,8 +83,8 @@ const DualSubspaceDistributionPlot = ({ subspace1Id, subspace2Id }) => {
   const plotData = () => {
     if (!attribute || !subspace1Distribution || !subspace2Distribution) return [];
 
-    const data1 = label !== "global" ? subspace1Distribution[label] : {};
-    const data2 = label !== "global" ? subspace2Distribution[label] : {};
+    const data1 = subspace1Distribution[label];
+    const data2 = subspace2Distribution[label];
 
     if (!data1 || !data2) return [];
 
@@ -96,10 +96,10 @@ const DualSubspaceDistributionPlot = ({ subspace1Id, subspace2Id }) => {
           y: [],
         };
       }
-    
+
       const min = Math.min(...keys);
       const max = Math.max(...keys);
-    
+
       const bins = Math.ceil((max - min) / binSize);
       if (bins <= 0 || isNaN(bins)) {
         return {
@@ -107,15 +107,15 @@ const DualSubspaceDistributionPlot = ({ subspace1Id, subspace2Id }) => {
           y: [],
         };
       }
-    
+
       const binEdges = Array.from({ length: bins + 1 }, (_, i) => min + i * binSize);
       const binCounts = Array(bins).fill(0);
-    
+
       keys.forEach((key) => {
         const binIndex = Math.min(Math.floor((key - min) / binSize), bins - 1);
         binCounts[binIndex] += data[key];
       });
-    
+
       return {
         x: binEdges.slice(0, -1).map((edge, i) => `${edge.toFixed(2)} - ${(edge + binSize).toFixed(2)}`),
         y: binCounts,
@@ -131,7 +131,7 @@ const DualSubspaceDistributionPlot = ({ subspace1Id, subspace2Id }) => {
         y: binnedData1.y,
         name: `Subspace ${subspace1Id}`,
         type: "bar",
-        marker: { color: "blue" },
+        marker: { color: "green" },
       },
       {
         x: binnedData2.x,
@@ -154,13 +154,12 @@ const DualSubspaceDistributionPlot = ({ subspace1Id, subspace2Id }) => {
             </option>
           ))}
         </select>
-        <label style={{ marginLeft: "20px", marginRight: "10px" }}>Label:</label>
+        <label style={{ marginLeft: "20px", marginRight: "10px" }}>Severity level diagnosed:</label>
         <select value={label} onChange={(e) => setLabel(e.target.value)}>
-          <option value="global">Global</option>
           {subspace1Distribution &&
             Object.keys(subspace1Distribution).map((lbl) => (
               <option key={lbl} value={lbl}>
-                Label {lbl}
+                {lbl}
               </option>
             ))}
         </select>
@@ -178,12 +177,13 @@ const DualSubspaceDistributionPlot = ({ subspace1Id, subspace2Id }) => {
         <Plot
           data={plotData()}
           layout={{
-            title: `Label-Wise Distribution of ${attribute} for Subspaces ${subspace1Id} and ${subspace2Id}`,
+            title: `Distribution of ${attribute} for Subspaces ${subspace1Id} and ${subspace2Id} given severity level diagnosed`,
             xaxis: {
-              title: { text: "Labels (0, 1, 2, 3, 4)" },
+              title: { text: attribute },
+              tickangle: 45,
             },
             yaxis: {
-              title: "Frequency",
+              title: "Number of Diagnoses",
             },
             barmode: "group",
             margin: { b: 100 },

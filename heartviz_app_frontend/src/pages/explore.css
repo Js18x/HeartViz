@@ -53,12 +53,8 @@ body {
   text-decoration: underline;
 }
 
-.tooltip-container {
-  position: relative;
-  display: inline-block;
-}
-
 .tooltip-button {
+  position: relative;
   background-color: #136f63;
   color: white;
   border: none;
@@ -70,8 +66,11 @@ body {
   text-align: center;
   line-height: 30px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  padding: 0;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .tooltip-button:hover {
@@ -94,10 +93,9 @@ body {
   transition: opacity 0.3s ease;
   font-size: 14px;
   line-height: 1.4;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.tooltip-container:hover .tooltip-content {
+.tooltip-button:hover .tooltip-content {
   visibility: visible;
   opacity: 1;
 }
@@ -116,13 +114,15 @@ body {
   border: 1px solid #d1d1d1;
   background-color: #f4f4f4;
   cursor: pointer;
-  margin-right: 3%;
-  width: 200px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  width: auto;
+  max-width: 200px;
+  margin-left: auto;
+  margin-right: 3%;
 }
 
 .subspace-dropdown:hover {

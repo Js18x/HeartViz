@@ -12,7 +12,6 @@ function Explore() {
   const subspaceId = searchParams.get("id");
   const [subspace, setSubspace] = useState(null);
   const [allSubspaces, setAllSubspaces] = useState([]);
-
   const [xFeature, setXFeature] = useState("");
   const [yFeature, setYFeature] = useState("");
 
@@ -23,6 +22,8 @@ function Explore() {
     const currentSubspace = savedSubspaces.find(
       (s) => s.id === Number(subspaceId)
     );
+
+    console.log("Current Subspace:", currentSubspace);
     setSubspace(currentSubspace);
   }, [subspaceId]);
 
@@ -37,7 +38,9 @@ function Explore() {
   };
 
   if (!subspaceId) {
-    return <p>Error: Subspace ID is missing. Please select a valid subspace.</p>;
+    return (
+      <p>Error: Subspace ID is missing. Please select a valid subspace.</p>
+    );
   }
 
   if (!subspace) {
@@ -49,18 +52,20 @@ function Explore() {
       <div className="header">
         <h1 className="subspace-name">
           Single-space exploration: {subspace.name}
-          <div className="tooltip-container">
-            <button className="tooltip-button">?</button>
+          <button className="tooltip-button">
+            ?
             <div className="tooltip-content">
-              {subspace.attributes && subspace.attributes.length > 0 ? (
-                `Attributes: ${subspace.attributes.join(", ")}`
+              {subspace.features && subspace.features.length > 0 ? (
+                <>
+                  <strong>Attributes:</strong> {subspace.features.join(", ")}
+                </>
               ) : (
                 "No attributes selected for this subspace."
               )}
             </div>
-          </div>
+          </button>
         </h1>
-  
+
         <select
           className="subspace-dropdown"
           value={subspaceId}
@@ -73,23 +78,21 @@ function Explore() {
           ))}
         </select>
       </div>
-  
+
       <div className="plots-container">
         <div className="plot-section">
           <h2>Parallel Coordinates Plot</h2>
           <ParallelCoordinatesPlot subspaceId={subspaceId} />
         </div>
 
-
         <div className="plot-section">
           <h2>Correlation Matrix</h2>
-
           <CorrelationMatrixHeatmap
             subspaceId={subspaceId}
             onMatrixClick={handleMatrixClick}
           />
         </div>
-  
+
         <div className="plot-section">
           <h2>Scatterplot</h2>
           <ScatterplotComponent
@@ -100,14 +103,14 @@ function Explore() {
             setYFeature={setYFeature}
           />
         </div>
-  
+
         <div className="plot-section">
           <h2>Distribution Plot</h2>
           <DistributionPlotComponent subspaceId={subspaceId} />
         </div>
       </div>
     </div>
-  );  
+  );
 }
 
 export default Explore;

@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./navBar.css";
+import logo from "../../logo.png";
 
 function NavigationBar({ onOpenInfoPanel }) {
   const navigate = useNavigate();
@@ -8,9 +9,16 @@ function NavigationBar({ onOpenInfoPanel }) {
   return (
     <div className="navbar">
       <div className="navbar-left">
-        <h1 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+      <img 
+          src={logo} 
+          alt="HeartViz Logo" 
+          className="navbar-logo" 
+          onClick={() => navigate("/")} 
+          style={{ cursor: "pointer", height: "60px" ,paddingLeft:'70px'}} // Adjust size of logo
+        />
+        {/* <h1 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
           HeartViz
-        </h1>
+        </h1> */}
       </div>
       <div className="navbar-right">
         <h1 onClick={onOpenInfoPanel} className="info-link">

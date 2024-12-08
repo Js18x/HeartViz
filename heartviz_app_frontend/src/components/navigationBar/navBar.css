@@ -1,8 +1,12 @@
+body {
+  font-family: 'Bree Serif', serif;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #2B50AA;
+  background-color: white;
   color: white;
   padding: 10px 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -22,8 +26,10 @@
 }
 
 .info-link {
-  color: white;
+  color: #1976D2;
   cursor: pointer;
+  font:'Bree Serif', serif;
+  padding-right: 30px;
   font-size: 16px;
   transition: color 0.3s ease, transform 0.3s ease;
 }

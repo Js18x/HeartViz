@@ -22,7 +22,6 @@ function AddSubspacePage2() {
         const response = await axios.get(
           "http://127.0.0.1:5000/feature_ranges"
         );
-
         const text = await (await fetch(
             `http://127.0.0.1:5000/fetch_data_with_features`
           )).text()
@@ -135,7 +134,6 @@ function AddSubspacePage2() {
       );
       if (response.data && response.data.subspace_index !== undefined) {
         const subspaceID = response.data.subspace_index;
-
         const savedSubspaces =
           JSON.parse(localStorage.getItem("subspaces")) || [];
         savedSubspaces.push({

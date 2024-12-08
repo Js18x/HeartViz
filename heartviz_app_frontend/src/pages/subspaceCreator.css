@@ -138,3 +138,25 @@ ul li:hover {
   gap: 10px;
   margin-top: 20px;
 }
+
+.cancel-button {
+  width: 150px;
+  margin-top: 20px;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  align-self: center;
+}
+
+.cancel-button:hover {
+  background-color: #c9302c;
+}
+
+.cancel-button:active {
+  transform: scale(0.95);
+}

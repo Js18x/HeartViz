@@ -127,6 +127,8 @@ def hierarchy_cluster():
         sub_ind_df = loader.fetch_data_with_features(sub_ind)
         cluster = DataCluster(sub_ind_df)
         cluster_tree = cluster.build_iterative_tree()
+        DataCluster.clusters.append(cluster)
+        cluster_tree["cluster_id"] = len(DataCluster.clusters) - 1
         return jsonify(cluster_tree)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
@@ -140,8 +142,6 @@ def distribution_by_feature():
     try:
         distribution = loader.distribution_by_feature(feature, sub_ind, by_label)
         return jsonify(distribution)
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
 
 
 @app.route('/update_subspace', methods=['POST'])
@@ -180,6 +180,12 @@ def get_feature_metric():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
+
+@app.route('/get_subspace_filter', methods=['GET'])
+def get_subspace_filter():
+    sub_ind = request.args.get("sub_ind", type=int)
+    result = loader.get_subspace_filter(sub_ind)
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run(debug=True)

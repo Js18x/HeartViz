@@ -1,56 +1,117 @@
 import React, { useState } from "react";
+import { Bar } from "react-chartjs-2";
+import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 
-function Filter({ name, min, max, onFilterChange }) {
+// Register necessary Chart.js components
+Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+function Filter({ name, min, max, onFilterChange, data }) {
   const [filterValues, setFilterValues] = useState({ min, max });
+  const [selection, setSelection] = useState({ start: null, end: null });
 
-  const handleMinChange = (e) => {
+  const handleInputChange = (e, type) => {
     const inputValue = e.target.value;
     if (inputValue === "") {
-      setFilterValues({ ...filterValues, min: "" });
+      setFilterValues({ ...filterValues, [type]: "" });
       return;
     }
-    const newMin = Number(inputValue);
-    if (!isNaN(newMin)) {
-      setFilterValues((prev) => ({ ...prev, min: newMin }));
+    const newValue = Number(inputValue);
+    if (!isNaN(newValue)) {
+      setFilterValues((prev) => ({ ...prev, [type]: newValue }));
     }
   };
 
-  const handleMinBlur = () => {
-    let newMin = filterValues.min === "" ? min : filterValues.min;
-    newMin = Math.min(Math.max(newMin, min), filterValues.max);
-    setFilterValues((prev) => ({ ...prev, min: newMin }));
-    onFilterChange(name, { ...filterValues, min: newMin });
+  const handleInputBlur = (type) => {
+    let newValue =
+      filterValues[type] === "" ? (type === "min" ? min : max) : filterValues[type];
+    if (type === "min") {
+      newValue = Math.min(Math.max(newValue, min), filterValues.max);
+    } else {
+      newValue = Math.max(Math.min(newValue, max), filterValues.min);
+    }
+    setFilterValues((prev) => ({ ...prev, [type]: newValue }));
+    onFilterChange(name, { ...filterValues, [type]: newValue });
   };
 
-  const handleMaxChange = (e) => {
-    const inputValue = e.target.value;
-    if (inputValue === "") {
-      setFilterValues({ ...filterValues, max: "" });
-      return;
-    }
-    const newMax = Number(inputValue);
-    if (!isNaN(newMax)) {
-      setFilterValues((prev) => ({ ...prev, max: newMax }));
+  const handleBarSelect = (event, elements) => {
+    if (elements.length > 0) {
+      const clickedIndex = elements[0].index;
+      const clickedValue = min + clickedIndex;
+
+      if (selection.start === null || selection.end !== null) {
+        setSelection({ start: clickedValue, end: null });
+      } else {
+        const start = Math.min(selection.start, clickedValue);
+        const end = Math.max(selection.start, clickedValue);
+        setSelection({ start: null, end: null });
+        setFilterValues({ min: start, max: end });
+        onFilterChange(name, { min: start, max: end });
+      }
     }
   };
 
-  const handleMaxBlur = () => {
-    let newMax = filterValues.max === "" ? max : filterValues.max;
-    newMax = Math.max(Math.min(newMax, max), filterValues.min);
-    setFilterValues((prev) => ({ ...prev, max: newMax }));
-    onFilterChange(name, { ...filterValues, max: newMax });
+  // Prepare data for the histogram
+  const histogramData = Array.from({ length: max - min + 1 }, (_, i) => min + i).map(
+    (value) => data.filter((item) => item === value).length
+  );
+
+  const chartData = {
+    labels: Array.from({ length: max - min + 1 }, (_, i) => min + i),
+    datasets: [
+      {
+        label: `Frequency of ${name}`,
+        data: histogramData,
+        backgroundColor: ({ dataIndex }) => {
+          const value = min + dataIndex;
+          if (
+            (selection.start !== null &&
+              selection.end === null &&
+              value === selection.start) ||
+            (selection.start !== null &&
+              selection.end !== null &&
+              value >= Math.min(selection.start, selection.end) &&
+              value <= Math.max(selection.start, selection.end)) ||
+            (selection.start === null && value >= filterValues.min && value <= filterValues.max)
+          ) {
+            return "rgba(255, 99, 132, 0.8)";
+          }
+          return "rgba(192, 192, 192, 0.6)";
+        },
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    onClick: (event, elements) => handleBarSelect(event, elements),
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: "Values",
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: "Frequency",
+        },
+        beginAtZero: true,
+      },
+    },
   };
 
   return (
-    <div className="filter">
+    <div>
       <h3>{name}</h3>
       <div>
         <label>Min:</label>
         <input
           type="number"
           value={filterValues.min}
-          onChange={handleMinChange}
-          onBlur={handleMinBlur}
+          onChange={(e) => handleInputChange(e, "min")}
+          onBlur={() => handleInputBlur("min")}
         />
       </div>
       <div>
@@ -58,9 +119,12 @@ function Filter({ name, min, max, onFilterChange }) {
         <input
           type="number"
           value={filterValues.max}
-          onChange={handleMaxChange}
-          onBlur={handleMaxBlur}
+          onChange={(e) => handleInputChange(e, "max")}
+          onBlur={() => handleInputBlur("max")}
         />
+      </div>
+      <div>
+        <Bar data={chartData} options={chartOptions} />
       </div>
     </div>
   );

@@ -9,6 +9,9 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 loader = DataLoader()
 
+@app.route('/test', methods=['GET'])
+def test_server():
+    return "hello"
 
 @app.route('/correlation_matrix', methods=['GET'])
 def get_correlation_matrix():
@@ -169,10 +172,13 @@ def dimension_reduce():
 @app.route('/get_feature_metric', methods=['GET'])
 def get_feature_metric():
     sub_ind = request.args.get("sub_ind", type=int)
-    feature = request.args.get("feature", '').split(',')
     metric = request.args.get("metric", type=str)
-    result = loader.get_feature_metric(sub_ind, feature, metric)
-    return jsonify(result)
+
+    try:
+        result = loader.get_feature_metric(sub_ind, metric)
+        return jsonify(result)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
 
 
 @app.route('/get_subspace_filter', methods=['GET'])

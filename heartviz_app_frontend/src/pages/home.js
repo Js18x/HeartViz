@@ -11,6 +11,11 @@ function HomePage() {
   const [newSubspaceName, setNewSubspaceName] = useState("");
   const [isFullDatasetCreated, setIsFullDatasetCreated] = useState(false);
 
+  // State for comparison popup
+  const [showComparePopup, setShowComparePopup] = useState(false);
+  const [compareSubspace1, setCompareSubspace1] = useState("");
+  const [compareSubspace2, setCompareSubspace2] = useState("");
+
   useEffect(() => {
     const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
     setSubspaces(savedSubspaces);
@@ -125,6 +130,17 @@ function HomePage() {
   };
 
   const handleOpenPopup = () => setShowPopup(true);
+  const handleClosePopup = () => setShowPopup(false);
+
+  const handleClearLocalStorage = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to clear all subspaces? This action cannot be undone."
+      )
+    ) {
+      localStorage.clear();
+      setSubspaces([]);
+      alert("All subspaces have been cleared.");
 
   const handleCardClick = (subspace) => {
     // Select or deselect subspace
@@ -133,6 +149,32 @@ function HomePage() {
     } else {
       setSelectedSubspace(subspace);
     }
+  };
+
+  // Open the compare popup
+  const handleOpenComparePopup = () => setShowComparePopup(true);
+  const handleCloseComparePopup = () => {
+    setShowComparePopup(false);
+    setCompareSubspace1("");
+    setCompareSubspace2("");
+  };
+
+  const handleCompareSubspaces = () => {
+    if (!compareSubspace1 || !compareSubspace2) {
+      alert("Please select two subspaces to compare.");
+      return;
+    }
+    if (compareSubspace1 === compareSubspace2) {
+      alert("Please select two different subspaces.");
+      return;
+    }
+    // Navigate to the radar page with sub_ind1, sub_ind2, and metric=avg
+    navigate(
+      `/radar?sub_ind1=${encodeURIComponent(
+        compareSubspace1
+      )}&sub_ind2=${encodeURIComponent(compareSubspace2)}&metric=avg`
+    );
+    handleCloseComparePopup();
   };
 
   return (
@@ -178,6 +220,21 @@ function HomePage() {
           <p>No subspaces available. Create a new one to get started.</p>
         )}
 
+
+      <div className="action-buttons">
+        <button onClick={handleOpenPopup} className="create-btn">
+          Create New Subspace
+        </button>
+        <button onClick={handleClearLocalStorage} className="clear-btn">
+          Clear All Subspaces
+        </button>
+        <button
+          onClick={handleOpenComparePopup}
+          className="create-btn"
+          style={{ backgroundColor: "blue" }}
+        >
+          Compare Subspaces
+        </button>
         <div className="action-buttons">
           <button onClick={handleOpenPopup} className="create-btn">
             Create New Subspace
@@ -213,6 +270,51 @@ function HomePage() {
             <div className="popup-actions">
               <button onClick={handleCreateSubspace}>Create</button>
               <button onClick={() => setShowPopup(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showComparePopup && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <h2>Compare Two Subspaces</h2>
+            <div className="compare-select-container">
+              <div className="select-group">
+                <label>Select Subspace 1</label>
+                <select
+                  className="compare-select"
+                  value={compareSubspace1}
+                  onChange={(e) => setCompareSubspace1(e.target.value)}
+                >
+                  <option value="">-- Choose Subspace --</option>
+                  {subspaces.map((sub) => (
+                    <option key={sub.id} value={sub.id}>
+                      {sub.name || `Subspace ${sub.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="select-group">
+                <label>Select Subspace 2</label>
+                <select
+                  className="compare-select"
+                  value={compareSubspace2}
+                  onChange={(e) => setCompareSubspace2(e.target.value)}
+                >
+                  <option value="">-- Choose Subspace --</option>
+                  {subspaces.map((sub) => (
+                    <option key={sub.id} value={sub.id}>
+                      {sub.name || `Subspace ${sub.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="popup-actions">
+              <button onClick={handleCompareSubspaces}>Compare</button>
+              <button onClick={handleCloseComparePopup}>Cancel</button>
             </div>
           </div>
         </div>

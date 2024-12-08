@@ -6,8 +6,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/home";
 import AddSubspacePage2 from "./pages/subspaceC";
 import Explore from "./pages/explore";
-import RadarComparison from "./components/RadarComparison"
+
 import EditSubspace from "./pages/edit";
+import RadarComparisonRatio from "./pages/RadarComparisonRatio";
 
 function App() {
   const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
@@ -25,7 +26,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/add-subspace" element={<AddSubspacePage2 />} />
           <Route path="/explore" element={<Explore />} />
-          <Route path="/radar" element={<RadarComparison />} />
+          <Route path="/radar" element={<RadarComparisonRatio />} />
           <Route path="/edit-subspace" element={<EditSubspace />} />
         </Routes>
         <InfoPanel isOpen={isInfoPanelOpen} onClose={() => setIsInfoPanelOpen(false)} />

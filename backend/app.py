@@ -6,7 +6,10 @@ from DataCluster import DataCluster
 from DataLoader import DataLoader
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}},
+     supports_credentials=True,
+     methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Credentials"])
 loader = DataLoader()
 
 @app.route('/test', methods=['GET'])
@@ -142,6 +145,8 @@ def distribution_by_feature():
     try:
         distribution = loader.distribution_by_feature(feature, sub_ind, by_label)
         return jsonify(distribution)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
 
 
 @app.route('/update_subspace', methods=['POST'])

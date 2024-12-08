@@ -65,6 +65,10 @@ class DataLoader:
         if len(features) != len(ranges):
             raise ValueError("Features and ranges must have the same length!")
 
+        # Ensure `target` is included in the features
+        if 'target' not in features:
+            features.append('target')
+
         condition = pd.Series(True, index=self.dataset.index)  # Start with all True
         filter = {"features": features, "ranges": ranges}
 
@@ -134,7 +138,6 @@ class DataLoader:
                 raise ValueError(f"Contains features that do not match: {diff_set}")
         return df[features]
 
-
     def distribution_by_feature(self, feature: str, sub_ind: int, by_label):
 
         if sub_ind is None:
@@ -163,6 +166,10 @@ class DataLoader:
     def update_subspace(self, features: list[str], ranges: list[list[Union[float, int]]], sub_ind: int = None):
         if len(features) != len(ranges):
             raise ValueError("Features and ranges must have the same length!")
+
+        # Ensure `target` is included in the features
+        if 'target' not in features:
+            features.append('target')
 
         if sub_ind is None:
             raise ValueError("Subspace index cannot be None")
@@ -250,9 +257,6 @@ class DataLoader:
             raise ValueError(f"Metric '{metric}' not supported.")
 
         return result
-
-
-
 
     def push_subspace(self, df: pd.DataFrame):
         self.subspaces.append(df)

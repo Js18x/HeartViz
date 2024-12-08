@@ -32,7 +32,7 @@ const DimensionItem = ({ dimension, index, moveDimension, toggleDimension, selec
       style={{
         padding: "8px",
         margin: "4px 0",
-        backgroundColor: selected ? "#007bff" : "#e0e0e0",
+        backgroundColor: selected ? "#1976D2" : "#e0e0e0",
         color: selected ? "#fff" : "#000",
         cursor: "move",
         opacity: isDragging ? 0.5 : 1,

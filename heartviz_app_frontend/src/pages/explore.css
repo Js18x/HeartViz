@@ -1,5 +1,9 @@
+body {
+  font-family: 'Bree Serif', serif;
+}
+
 .explore-page {
-  font-family: Arial, sans-serif;
+  font-family: 'Bree Serif', serif;
   padding: 20px;
   background-color: #f9f9f9;
 }
@@ -22,8 +26,9 @@
 .plot-section h2 {
   margin-bottom: 20px;
   font-size: 22px;
-  color: #333;
+  color: #212121;
   text-align: center;
+  
 }
 
 @media (max-width: 600px) {

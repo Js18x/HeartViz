@@ -1,0 +1,39 @@
+.filter {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.filter h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.filter div {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.filter label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.filter label:hover {
+  background-color: #f0f8ff;
+  border-radius: 8px;
+  padding: 5px;
+}
+
+
+.filter input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}

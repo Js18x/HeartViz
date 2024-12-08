@@ -49,7 +49,7 @@ const CorrelationMatrixHeatmap = ({ subspaceId, onMatrixClick }) => {
 
   const features = Object.keys(matrixData);
 
-  // Create zValues and mask matrices
+
   const zValues = features.map((rowKey, rowIndex) =>
     features.map((colKey, colIndex) =>
       rowIndex === colIndex ? NaN : matrixData[rowKey][colKey]

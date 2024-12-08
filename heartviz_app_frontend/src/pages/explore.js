@@ -13,16 +13,13 @@ function Explore() {
   const [subspace, setSubspace] = useState(null);
   const [allSubspaces, setAllSubspaces] = useState([]);
 
-  // State for scatterplot features
   const [xFeature, setXFeature] = useState("");
   const [yFeature, setYFeature] = useState("");
 
   useEffect(() => {
-    // Retrieve subspaces from local storage
     const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
     setAllSubspaces(savedSubspaces);
 
-    // Find the current subspace
     const currentSubspace = savedSubspaces.find(
       (s) => s.id === Number(subspaceId)
     );
@@ -34,7 +31,6 @@ function Explore() {
     navigate(`/explore?id=${selectedSubspaceId}`);
   };
 
-  // Handler to update scatterplot features from the correlation matrix
   const handleMatrixClick = (x, y) => {
     setXFeature(x);
     setYFeature(y);
@@ -52,7 +48,7 @@ function Explore() {
     <div className="explore-page">
       <div className="header">
         <h1 className="subspace-name">
-          Subspace: {subspace.name}
+          Single-space exploration: {subspace.name}
           <div className="tooltip-container">
             <button className="tooltip-button">?</button>
             <div className="tooltip-content">
@@ -83,10 +79,11 @@ function Explore() {
           <h2>Parallel Coordinates Plot</h2>
           <ParallelCoordinatesPlot subspaceId={subspaceId} />
         </div>
-  
+
+
         <div className="plot-section">
           <h2>Correlation Matrix</h2>
-          {/* Pass the handler for matrix cell clicks */}
+
           <CorrelationMatrixHeatmap
             subspaceId={subspaceId}
             onMatrixClick={handleMatrixClick}

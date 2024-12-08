@@ -21,7 +21,7 @@ function EditSubspace() {
       try {
         setLoading(true);
 
-        // Load all attributes and ranges from the backend
+
         const response = await axios.get("http://127.0.0.1:5000/feature_ranges");
         if (!response.data || !response.data.feature_ranges) {
           throw new Error("Invalid response: 'feature_ranges' key missing");
@@ -34,7 +34,6 @@ function EditSubspace() {
         }));
         setAttributes(fetchedAttributes);
 
-        // If editing an existing subspace, fetch its data from localStorage
         if (subspaceId) {
           const savedSubspaces = JSON.parse(localStorage.getItem("subspaces")) || [];
           const currentSubspace = savedSubspaces.find((s) => s.id === Number(subspaceId));
@@ -42,7 +41,6 @@ function EditSubspace() {
           if (currentSubspace) {
             setSubspaceName(currentSubspace.name);
 
-            // Map existing filters and attributes
             const selected = currentSubspace.features.map((feature) =>
               fetchedAttributes.find((attr) => attr.name === feature)
             );
@@ -111,7 +109,7 @@ function EditSubspace() {
       );
 
       const updatedSubspace = {
-        id: Number(subspaceId), // Ensure the same ID is used when editing
+        id: Number(subspaceId),
         name: subspaceName,
         features,
         ranges,

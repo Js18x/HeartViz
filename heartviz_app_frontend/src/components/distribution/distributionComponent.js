@@ -4,16 +4,15 @@ import axios from "axios";
 
 const DistributionPlot = ({ subspaceId }) => {
   const [attribute, setAttribute] = useState("");
-  const [label, setLabel] = useState("global"); // Default to global distribution
+  const [label, setLabel] = useState("global");
   const [attributes, setAttributes] = useState([]);
-  const [binSize, setBinSize] = useState(10); // Default bin size
-  const [tempBinSize, setTempBinSize] = useState("10"); // Temporary input state for bin size
+  const [binSize, setBinSize] = useState(10);
+  const [tempBinSize, setTempBinSize] = useState("10");
   const [globalDistribution, setGlobalDistribution] = useState(null);
   const [labelWiseDistribution, setLabelWiseDistribution] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch available attributes
     const fetchAttributes = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:5000/feature_ranges", {
@@ -21,7 +20,7 @@ const DistributionPlot = ({ subspaceId }) => {
         });
         const attributes = Object.keys(response.data.feature_ranges);
         setAttributes(attributes);
-        setAttribute(attributes[0]); // Default to the first attribute
+        setAttribute(attributes[0]);
       } catch (err) {
         setError("Failed to fetch attributes.");
       }
@@ -32,7 +31,6 @@ const DistributionPlot = ({ subspaceId }) => {
 
   useEffect(() => {
     if (attribute) {
-      // Fetch global distribution
       const fetchGlobalDistribution = async () => {
         try {
           const response = await axios.get("http://127.0.0.1:5000/distribution_by_feature", {
@@ -44,7 +42,6 @@ const DistributionPlot = ({ subspaceId }) => {
         }
       };
 
-      // Fetch label-wise distribution
       const fetchLabelWiseDistribution = async () => {
         try {
           const response = await axios.get("http://127.0.0.1:5000/distribution_by_feature", {
@@ -62,13 +59,13 @@ const DistributionPlot = ({ subspaceId }) => {
   }, [attribute, subspaceId]);
 
   const handleBinSizeChange = (e) => {
-    setTempBinSize(e.target.value); // Allow user to edit freely
+    setTempBinSize(e.target.value);
   };
 
   const handleBinSizeBlur = () => {
     const value = parseInt(tempBinSize, 10);
     if (!value || value <= 0) {
-      setBinSize(1); // Set to minimum value
+      setBinSize(1);
       setTempBinSize("1");
     } else {
       setBinSize(value);
@@ -86,7 +83,6 @@ const DistributionPlot = ({ subspaceId }) => {
 
     if (!data) return [];
 
-    // Binning logic
     const keys = Object.keys(data).map((k) => parseFloat(k));
     const min = Math.min(...keys);
     const max = Math.max(...keys);

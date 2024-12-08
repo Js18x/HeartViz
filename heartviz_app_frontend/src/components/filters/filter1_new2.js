@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 
-// Register necessary Chart.js components
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function Filter({ name, min, max, onFilterChange, data }) {
@@ -50,7 +49,6 @@ function Filter({ name, min, max, onFilterChange, data }) {
     }
   };
 
-  // Prepare data for the histogram
   const histogramData = Array.from({ length: max - min + 1 }, (_, i) => min + i).map(
     (value) => data.filter((item) => item === value).length
   );

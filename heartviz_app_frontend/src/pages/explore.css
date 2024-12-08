@@ -33,7 +33,6 @@
   }
 }
 
-/* Subspace Name Styling */
 .subspace-name {
   font-size: 1.5rem;
   font-weight: bold;
@@ -49,7 +48,6 @@
   text-decoration: underline;
 }
 
-/* Tooltip Styles */
 .tooltip-container {
   position: relative;
   display: inline-block;
@@ -114,8 +112,8 @@
   background-color: #f4f4f4;
   cursor: pointer;
   margin-right: 3%;
-  width: 200px; /* Fixed size for consistency */
-  text-overflow: ellipsis; /* Truncate long text */
+  width: 200px;
+  text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -123,17 +121,16 @@
 }
 
 .subspace-dropdown:hover {
-  border-color: #136f63; /* Highlight border on hover */
-  background-color: #e9f5f4; /* Slightly darker shade on hover */
+  border-color: #136f63;
+  background-color: #e9f5f4;
 }
 
 .subspace-dropdown:focus {
   outline: none;
-  border-color: #136f63; /* Focus border color */
+  border-color: #136f63;
   background-color: #e9f5f4;
 }
 
 .subspace-dropdown option {
-  text-overflow: ellipsis; /* Truncate long options in the dropdown */
+  text-overflow: ellipsis;
 }
-

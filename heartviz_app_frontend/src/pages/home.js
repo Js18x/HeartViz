@@ -161,7 +161,7 @@ function HomePage() {
       return;
     }
     navigate(
-      `/radar?sub_ind1=${encodeURIComponent(
+      `/multi-space-explore?sub_ind1=${encodeURIComponent(
         compareSubspace1
       )}&sub_ind2=${encodeURIComponent(compareSubspace2)}&metric=avg`
     );

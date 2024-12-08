@@ -12,7 +12,6 @@ function AddSubspacePage2() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [data, setData] = useState({})
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,10 +22,10 @@ function AddSubspacePage2() {
           "http://127.0.0.1:5000/feature_ranges"
         );
         const text = await (await fetch(
-            `http://127.0.0.1:5000/fetch_data_with_features`
-          )).text()
-          const sanitizedText = text.replace(/NaN/g, "null");
-          const data = JSON.parse(sanitizedText);
+          `http://127.0.0.1:5000/fetch_data_with_features`
+        )).text();
+        const sanitizedText = text.replace(/NaN/g, "null");
+        const fetchedData = JSON.parse(sanitizedText);
         if (response.data && response.data.feature_ranges) {
           const fetchedAttributes = Object.entries(
             response.data.feature_ranges
@@ -34,19 +33,15 @@ function AddSubspacePage2() {
             id: name,
             name,
             range: range.map(Number),
-            data: data.data?.[name]
+            data: fetchedData.data?.[name],
           }));
           setAttributes(fetchedAttributes);
         } else {
-          throw new Error(
-            "Invalid response format: 'feature_ranges' key missing"
-          );
+          throw new Error("Invalid response format: 'feature_ranges' key missing");
         }
       } catch (err) {
-        console.error("Error fetching attributes:", err);
         setError(
-          err.response?.data?.error ||
-            "Error fetching attributes. Please try again."
+          err.response?.data?.error || "Error fetching attributes. Please try again."
         );
       } finally {
         setLoading(false);
@@ -126,7 +121,6 @@ function AddSubspacePage2() {
       }
 
       const payload = { features, ranges };
-      console.log("Saving Subspace with Payload:", payload);
 
       const response = await axios.post(
         "http://127.0.0.1:5000/create_subspace",
@@ -152,7 +146,6 @@ function AddSubspacePage2() {
         alert("Failed to save subspace. Please try again.");
       }
     } catch (err) {
-      console.error("Error saving subspace:", err);
       alert("Error saving subspace. Please try again.");
     }
   };
@@ -173,13 +166,11 @@ function AddSubspacePage2() {
           />
           {filteredAttributes.length > 0 ? (
             <ul>
-              {filteredAttributes.map((attr) => {
-                return (
-                  <li key={attr.id} onClick={() => handleSelectAttribute(attr)}>
-                    {attr.name}
-                  </li>
-                );
-              })}
+              {filteredAttributes.map((attr) => (
+                <li key={attr.id} onClick={() => handleSelectAttribute(attr)}>
+                  {attr.name}
+                </li>
+              ))}
             </ul>
           ) : (
             <p>No attributes available.</p>

@@ -1,0 +1,36 @@
+.radar-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 500px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.chart-placeholder {
+  text-align: center;
+  color: #666;
+  font-size: 18px;
+  padding: 20px;
+}
+
+.tooltip-container {
+  background: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.custom-radar-chart {
+  width: 100%;
+  height: 500px;
+  margin: 0 auto;
+}
+
+.axis-label text {
+  fill: black !important;
+  font-size: 12px;
+  font-weight: bold;
+}

@@ -10,7 +10,7 @@ function CategoryFilterEdit({ name, range, onFilterChange, defaultFilter = [] })
   const [selectedCategories, setSelectedCategories] = useState([]);
 
   useEffect(() => {
-    setSelectedCategories(defaultFilter); // Initialize with saved filter
+    setSelectedCategories(defaultFilter);
   }, [defaultFilter]);
 
   const handleCategoryChange = (category) => {

@@ -65,6 +65,10 @@ class DataLoader:
         if len(features) != len(ranges):
             raise ValueError("Features and ranges must have the same length!")
 
+        # Ensure `target` is included in the features
+        if 'target' not in features:
+            features.append('target')
+
         condition = pd.Series(True, index=self.dataset.index)  # Start with all True
         filter = {"features": features, "ranges": ranges}
 
@@ -134,7 +138,6 @@ class DataLoader:
                 raise ValueError(f"Contains features that do not match: {diff_set}")
         return df[features]
 
-
     def distribution_by_feature(self, feature: str, sub_ind: int, by_label):
 
         if sub_ind is None:
@@ -163,6 +166,10 @@ class DataLoader:
     def update_subspace(self, features: list[str], ranges: list[list[Union[float, int]]], sub_ind: int = None):
         if len(features) != len(ranges):
             raise ValueError("Features and ranges must have the same length!")
+
+        # Ensure `target` is included in the features
+        if 'target' not in features:
+            features.append('target')
 
         if sub_ind is None:
             raise ValueError("Subspace index cannot be None")
@@ -221,7 +228,7 @@ class DataLoader:
 
         return reduced_df
 
-    def get_feature_metric(self, sub_ind: int, features: [str], metric: str):
+    def get_feature_metric(self, sub_ind: int, metric: str):
         if sub_ind is None:
             df = self.dataset
         elif not 0 <= sub_ind < len(self.subspaces):
@@ -229,15 +236,27 @@ class DataLoader:
         else:
             df = self.subspaces[sub_ind]
 
-        if not set(features).issubset(df.columns):
-            raise ValueError(f"Features '{features}' not found in the subspace {sub_ind}.")
+        # Full list of features (columns)
+        all_features = [
+            "age", "sex", "cp", "trestbps", "chol", "fbs", "restecg",
+            "thalach", "exang", "oldpeak", "slope", "ca", "thal", "target"
+        ]
 
+        # Depending on the metric, compute values or default to 0
         if metric == 'max':
-            return df[features].max().to_dict()
-        if metric == 'avg':
-            return df[features].mean().to_dict()
-        raise ValueError(f"Metric '{metric}' not supported.")
+            result = {
+                f: (float(df[f].max()) if f in df.columns and not df[f].empty else 0)
+                for f in all_features
+            }
+        elif metric == 'avg':
+            result = {
+                f: (float(df[f].mean()) if f in df.columns and not df[f].empty else 0)
+                for f in all_features
+            }
+        else:
+            raise ValueError(f"Metric '{metric}' not supported.")
 
+        return result
 
     def push_subspace(self, df: pd.DataFrame):
         self.subspaces.append(df)

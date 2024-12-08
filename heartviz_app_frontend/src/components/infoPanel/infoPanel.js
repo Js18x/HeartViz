@@ -1,7 +1,6 @@
 import React from "react";
 import "./infoPanel.css";
 
-// JSON Data for "Description"s
 const variableDescriptions = [
   {
     "Variable Name": "age",
@@ -109,7 +108,7 @@ function InfoPanel({ isOpen, onClose }) {
         <div className="info-panel-overlay" onClick={onClose}>
           <div
             className="info-panel"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+            onClick={(e) => e.stopPropagation()}
           >
             <h2>Information</h2>
             <div className="variables-list">

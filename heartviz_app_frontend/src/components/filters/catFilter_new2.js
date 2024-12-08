@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 
-// Register necessary Chart.js components
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function CategoryFilter({ name, range, onFilterChange, data }) {
@@ -30,7 +29,6 @@ function CategoryFilter({ name, range, onFilterChange, data }) {
     }
   };
 
-  // Prepare data for the histogram
   const histogramData = categories.map((category) =>
     data.filter((item) => item === category).length
   );
@@ -44,7 +42,7 @@ function CategoryFilter({ name, range, onFilterChange, data }) {
         backgroundColor: ({ dataIndex }) => {
           const category = categories[dataIndex];
           return selectedCategories.includes(category)
-            ? "rgba(255, 99, 132, 0.8)" // Highlight selected categories
+            ? "rgba(255, 99, 132, 0.8)"
             : "rgba(192, 192, 192, 0.6)";
         },
         borderColor: ({ dataIndex }) => {

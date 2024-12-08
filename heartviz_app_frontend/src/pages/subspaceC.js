@@ -14,7 +14,6 @@ function AddSubspacePage2() {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  // Fetch all attributes and their ranges from the backend
   useEffect(() => {
     const fetchAttributes = async () => {
       try {
@@ -22,7 +21,11 @@ function AddSubspacePage2() {
         const response = await axios.get(
           "http://127.0.0.1:5000/feature_ranges"
         );
-
+        const text = await (await fetch(
+          `http://127.0.0.1:5000/fetch_data_with_features`
+        )).text();
+        const sanitizedText = text.replace(/NaN/g, "null");
+        const fetchedData = JSON.parse(sanitizedText);
         if (response.data && response.data.feature_ranges) {
           const fetchedAttributes = Object.entries(
             response.data.feature_ranges
@@ -30,18 +33,15 @@ function AddSubspacePage2() {
             id: name,
             name,
             range: range.map(Number),
+            data: fetchedData.data?.[name],
           }));
           setAttributes(fetchedAttributes);
         } else {
-          throw new Error(
-            "Invalid response format: 'feature_ranges' key missing"
-          );
+          throw new Error("Invalid response format: 'feature_ranges' key missing");
         }
       } catch (err) {
-        console.error("Error fetching attributes:", err);
         setError(
-          err.response?.data?.error ||
-            "Error fetching attributes. Please try again."
+          err.response?.data?.error || "Error fetching attributes. Please try again."
         );
       } finally {
         setLoading(false);
@@ -51,7 +51,6 @@ function AddSubspacePage2() {
     fetchAttributes();
   }, []);
 
-  // Helper to check if an attribute is categorical
   const isCategorical = (name) => {
     const categoricalVariables = [
       "sex",
@@ -65,7 +64,6 @@ function AddSubspacePage2() {
     return categoricalVariables.includes(name);
   };
 
-  // Handle selecting an attribute
   const handleSelectAttribute = (attribute) => {
     if (selectedAttributes.some((attr) => attr.id === attribute.id)) {
       alert("Attribute already selected!");
@@ -87,7 +85,6 @@ function AddSubspacePage2() {
     });
   };
 
-  // Handle deselecting an attribute
   const handleDeselectAttribute = (attribute) => {
     setSelectedAttributes(
       selectedAttributes.filter((attr) => attr.id !== attribute.id)
@@ -97,20 +94,17 @@ function AddSubspacePage2() {
     setFilters(updatedFilters);
   };
 
-  // Handle updating filter values
   const handleFilterChange = (name, newFilterValues) => {
     setFilters({ ...filters, [name]: newFilterValues });
   };
 
-  // Filter attributes based on search term
   const filteredAttributes = attributes.filter((attr) =>
     attr.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Handle saving the subspace
   const handleSaveSubspace = async () => {
     try {
-      const features = Object.keys(filters); // Attribute names
+      const features = Object.keys(filters);
       const ranges = features.map((feature) =>
         isCategorical(feature)
           ? filters[feature]
@@ -127,7 +121,6 @@ function AddSubspacePage2() {
       }
 
       const payload = { features, ranges };
-      console.log("Saving Subspace with Payload:", payload);
 
       const response = await axios.post(
         "http://127.0.0.1:5000/create_subspace",
@@ -135,14 +128,13 @@ function AddSubspacePage2() {
       );
       if (response.data && response.data.subspace_index !== undefined) {
         const subspaceID = response.data.subspace_index;
-
-        // Save subspace_id, name, and selected attributes locally
         const savedSubspaces =
           JSON.parse(localStorage.getItem("subspaces")) || [];
         savedSubspaces.push({
           id: subspaceID,
           name: subspaceName,
-          attributes: features, // Save attribute names
+          features,
+          ranges,
         });
         localStorage.setItem("subspaces", JSON.stringify(savedSubspaces));
 
@@ -154,7 +146,6 @@ function AddSubspacePage2() {
         alert("Failed to save subspace. Please try again.");
       }
     } catch (err) {
-      console.error("Error saving subspace:", err);
       alert("Error saving subspace. Please try again.");
     }
   };
@@ -212,12 +203,14 @@ function AddSubspacePage2() {
                 key={attr.id}
                 name={attr.name}
                 range={attr.range}
+                data={attr.data}
                 onFilterChange={handleFilterChange}
               />
             ) : (
               <Filter
                 key={attr.id}
                 name={attr.name}
+                data={attr.data}
                 min={attr.range[0]}
                 max={attr.range[1]}
                 onFilterChange={handleFilterChange}
